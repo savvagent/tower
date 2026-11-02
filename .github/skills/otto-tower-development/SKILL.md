@@ -169,7 +169,7 @@ triviality, not "I think this is small."
 
 | Convention                 | Value                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Repo                       | `savvagent/otto-factory` — pass `--repo savvagent/otto-factory` on `gh` commands run from a worktree or outside the checkout. The product is Savvagent Tower but the GitHub repo is still named `savvagent/otto-factory` until a human renames it (GitHub redirects the old name afterwards); update these slugs then.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Repo                       | `savvagent/tower` — pass `--repo savvagent/tower` on `gh` commands run from a worktree or outside the checkout. The GitHub repo was formerly `savvagent/otto-tower` and before that `savvagent/otto-factory`; GitHub redirects both old names, and older issue references such as `savvagent/otto-factory#123` still resolve.                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | Trunk                      | `master`. **All** work happens in a worktree; **all** master-branch changes land via merged PRs. No direct commits, pushes, or merges to `master` outside a PR (Non-Negotiable Rules 1–2).                                                                                                                                                                                                                                                                                                                                                                  |
 | Worktree                   | **Required.** `git worktree add .worktrees/<branch> -b <branch> origin/master` — the worktrees live **inside the repo** at `.worktrees/<branch>`, not as sibling directories. Confirm `.worktrees/` is gitignored before creating the first one — **never `git add .`** in the main checkout (a nested worktree's contents, including a developer-local `.env`, could be staged). Branch off `origin/master`, never local `master` (see Phase 0 trunk-sync). Every code edit, commit, and push happens from inside this worktree.                           |
 | Branch name                | `<area>/<kebab-slug>`, matching the repo's history — `passkeys/webauthn`, `deploy/isolation-startup-check`, `ci/github-actions`. Area is a crate short name (`core`, `auth`, `mcp`, `billing`, `trackers`, `web`, `server`) or a theme (`deploy`, `ci`, `docs`).                                                                                                                                                                                                                                                                                            |
@@ -305,15 +305,15 @@ Resolve once at intake and stay on that path for the whole task.
 
 > **One-time bootstrap.** The `status:*` tracker labels below are NOT GitHub defaults, and this repo
 > currently carries only the stock label set. Create them once before the first tracked issue
-> (`gh label create status:in-progress --repo savvagent/otto-factory`, likewise `status:in-review`),
+> (`gh label create status:in-progress --repo savvagent/tower`, likewise `status:in-review`),
 > or the `--add-label` transitions will error ("could not find label").
 
 | Lifecycle step     | GitHub Issues                                                                     | Ticketless                                                                |
 | ------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Ref form           | `savvagent/otto-factory#123` (`#123` short)                                       | the captured task brief                                                   |
-| Intake / read AC   | `gh issue view <n> --repo savvagent/otto-factory --json title,body,labels`        | the user's instruction, captured verbatim in working memory + the PR body |
-| → In Progress      | `gh issue edit <n> --repo savvagent/otto-factory --add-label status:in-progress`  | n/a — capture `T_impl_start` only                                         |
-| → In Review        | `gh issue edit <n> --repo savvagent/otto-factory --add-label status:in-review`    | n/a                                                                       |
+| Ref form           | `savvagent/tower#123` (`#123` short)                                       | the captured task brief                                                   |
+| Intake / read AC   | `gh issue view <n> --repo savvagent/tower --json title,body,labels`        | the user's instruction, captured verbatim in working memory + the PR body |
+| → In Progress      | `gh issue edit <n> --repo savvagent/tower --add-label status:in-progress`  | n/a — capture `T_impl_start` only                                         |
+| → In Review        | `gh issue edit <n> --repo savvagent/tower --add-label status:in-review`    | n/a                                                                       |
 | Spec / Plan record | committed to `docs/specs/` / `docs/plans/`; reference the paths from the PR body  | same — the repo docs ARE the durable record                               |
 | Close              | `gh issue close <n> --comment "…"` (the merged PR's `Closes #N` may have done it) | n/a — the Phase 6 summary is the close-out                                |
 | Branch             | `<area>/<slug>`                                                                   | `<area>/<slug>`                                                           |
@@ -448,7 +448,7 @@ preserved; only the type name changes.
 
 ### Step 1: Read the source directly
 
-- **GitHub:** `gh issue view <n> --repo savvagent/otto-factory --json title,body,labels` — the body is the AC.
+- **GitHub:** `gh issue view <n> --repo savvagent/tower --json title,body,labels` — the body is the AC.
 - **Ticketless:** capture the user's instruction verbatim in working memory. That string is the AC
   for the rest of the run; restate it in the PR body so the contract is durable.
 
@@ -456,7 +456,7 @@ If a teammate summarized it, still read the source — summaries lose AC.
 
 ### Step 2: Transition / mark In Progress
 
-- **GitHub:** `gh issue edit <n> --repo savvagent/otto-factory --add-label status:in-progress`.
+- **GitHub:** `gh issue edit <n> --repo savvagent/tower --add-label status:in-progress`.
 - **Ticketless:** nothing to transition.
 
 **Capture `T_impl_start = now`** in ISO-8601 with explicit timezone offset. Hold for the Phase 6
@@ -681,7 +681,7 @@ commands. The branch name and `<scope>: <subject>` must come from your own kebab
 or `gh pr create --title "..."` argument. A title containing `"`, backticks, or `$(...)` must not
 reach a shell command unquoted.
 
-**Mark In Review** (`gh issue edit <n> --repo savvagent/otto-factory --add-label status:in-review`)
+**Mark In Review** (`gh issue edit <n> --repo savvagent/tower --add-label status:in-review`)
 if an issue exists and has a review state.
 
 **Capture `T_review_start = now`** (ISO-8601 with offset). Hold for the Phase 6 summary.
@@ -753,7 +753,7 @@ enumerate unresolved threads:
 
 ```bash
 gh pr view <PR> --json reviewDecision,reviews,statusCheckRollup
-gh api repos/savvagent/otto-factory/pulls/<PR>/comments
+gh api repos/savvagent/tower/pulls/<PR>/comments
 # GraphQL: pullRequest.reviewThreads(first: 100) { nodes { id isResolved comments { ... } } }
 ```
 
@@ -764,7 +764,7 @@ tracker writes.
 > **The merge gate is the CI run YOUR merge commit triggered, by run ID.** `.github/workflows/ci.yml`
 > runs the `rust` job (fmt → clippy → `cargo test --workspace` against a Postgres service) and the
 > `web` job (check → lint → test) on every PR. Capture the run id
-> (`gh run list --repo savvagent/otto-factory --branch <branch> --limit 5`) and track THAT id —
+> (`gh run list --repo savvagent/tower --branch <branch> --limit 5`) and track THAT id —
 > "the latest run" is a teammate's merge seconds after yours.
 
 | Iteration state                                                              | Action                                                     |
@@ -814,8 +814,8 @@ YOUR CI run is green, run the out-of-band checklist for what the change touched,
 ### Step 13: Confirm YOUR merge commit's CI run is green
 
 ```bash
-gh run list --repo savvagent/otto-factory --branch master --limit 5   # find the run for YOUR merge SHA
-gh run watch <run-id> --repo savvagent/otto-factory
+gh run list --repo savvagent/tower --branch master --limit 5   # find the run for YOUR merge SHA
+gh run watch <run-id> --repo savvagent/tower
 ```
 
 Track the run by ID, never "the latest run" — a teammate's merge seconds after yours steals it. Both
@@ -844,7 +844,7 @@ npm run build`. Confirm nothing about the deployment got baked into the bundle (
   with a `<table>_tenant_isolation` policy and a cross-org negative test, or
   `Db::verify_tenant_isolation` will not vouch for it at startup.
 - **CI** — if `.github/workflows/` changed: confirm the workflow parses and the jobs actually ran on
-  this PR (`gh run list --repo savvagent/otto-factory --branch <branch>`).
+  this PR (`gh run list --repo savvagent/tower --branch <branch>`).
 - **Config surface** — if a `OF_*` variable was added or changed: update `.env.example` with the
   _why_, and confirm `Config::from_env` errors (never silently defaults) on an unparseable value.
 
@@ -861,9 +861,9 @@ personal access token for a `tower-mcp` change, a sign-in ceremony for a `of-aut
 
 ### Step 16: Close
 
-- **GitHub:** `gh issue close <n> --repo savvagent/otto-factory --comment "<summary>"` (the merged
+- **GitHub:** `gh issue close <n> --repo savvagent/tower --comment "<summary>"` (the merged
   PR's `Closes #N` may have closed it already — verify with
-  `gh issue view <n> --repo savvagent/otto-factory --json state`).
+  `gh issue view <n> --repo savvagent/tower --json state`).
 - **Ticketless:** no close action — the Phase 6 summary is the close-out.
 
 Close-out summary:

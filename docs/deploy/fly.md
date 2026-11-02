@@ -305,7 +305,7 @@ ROLLBACK;
 
 (`event_name` is `otto_factory__<meter>`: the meter key with `-` turned into `_` and `/` into `__`.
 A meter containing `__` uses the escaped form instead, `otto_hfactory___<meter with _ as _u>`; see
-`otto-platform/crates/otto-billing/src/stripe/event_name.rs`.)
+`crates/otto-billing/src/stripe/event_name.rs` in `savvagent/platform`.)
 Also run, on the platform's machine. Both commands are read-only: `show` prints the service, its
 declared meters, its aliases and the rename blocker counts, and `--dry-run` runs the real guard in a
 transaction that is always rolled back. Do **not** use `resource describe` here: it replaces the
@@ -755,7 +755,7 @@ as a repository secret. That protection reaches exactly as far as the `master` r
 that lands on `master` runs with the token, so whoever can merge a change to
 `.github/workflows/` can use it (CODEOWNERS for that path is #126). To rotate: mint a new token
 with an expiry (`fly tokens create deploy -a otto-factory-mcp --expiry 8760h`), `gh secret set
-FLY_API_TOKEN --env production -R savvagent/otto-factory`, then revoke the old one (`fly tokens
+FLY_API_TOKEN --env production -R savvagent/tower`, then revoke the old one (`fly tokens
 list -a otto-factory-mcp` / `fly tokens revoke <id>`) — revoking is the step that makes a
 rotation mean anything, not an optional tidy-up. A failed `flyctl deploy` leaves the previously-running
 machine serving traffic, since Fly's own rolling-deploy health check (`/readyz`) never cuts
