@@ -1,11 +1,11 @@
 ---
 name: otto-tower-scanner
-description: Use when scanning open GitHub issues in savvagent/otto-factory and enqueuing eligible ones into the Savvagent Tower job queue — checking each issue carries exactly one type label (bug/enhancement/documentation) first, adding one in place if missing, then queueing it. Trigger on "scan issues", "sync issues to Savvagent Tower", "queue open issues", "run otto-tower-scanner", or a scheduled/periodic invocation of this skill. Not for creating a brand-new issue or for claiming and working a queued job (otto-tower-worker, which dispatches otto-tower-development for the per-job mechanics).
+description: Use when scanning open GitHub issues in savvagent/tower and enqueuing eligible ones into the Savvagent Tower job queue — checking each issue carries exactly one type label (bug/enhancement/documentation) first, adding one in place if missing, then queueing it. Trigger on "scan issues", "sync issues to Savvagent Tower", "queue open issues", "run otto-tower-scanner", or a scheduled/periodic invocation of this skill. Not for creating a brand-new issue or for claiming and working a queued job (otto-tower-worker, which dispatches otto-tower-development for the per-job mechanics).
 ---
 
 # Savvagent Tower Scanner
 
-This skill is the periodic bridge between GitHub Issues on `savvagent/otto-factory` and
+This skill is the periodic bridge between GitHub Issues on `savvagent/tower` and
 the Savvagent Tower job queue: it finds open issues that have no job yet, makes sure each
 one carries exactly one type label, and queues it via the `savvagent-tower` MCP server. It
 is Claude-Code-native — it orchestrates via the Agent tool and calls `savvagent-tower` MCP
@@ -49,19 +49,19 @@ Launch one subagent (a fresh `general-purpose` agent — it needs no prior
 context) with this task:
 
 1. Call `whoami`. Confirm the organization it returns is `savvagent` — this
-   token should open the org that owns `savvagent/otto-factory`'s
+   token should open the org that owns `savvagent/tower`'s
    Savvagent Tower registration. If you cannot confirm that with certainty,
    stop and report which org `whoami` returned rather than proceeding as if
    it were correct.
-2. Resolve the Savvagent Tower repo slug for `savvagent/otto-factory` — call
+2. Resolve the Savvagent Tower repo slug for `savvagent/tower` — call
    `resolve_repo` with `remote` set to `git remote get-url origin`
-   (`https://github.com/savvagent/otto-factory.git`). If it fails to
-   resolve, call `list_repos`. If `savvagent/otto-factory` is truly
+   (`https://github.com/savvagent/tower.git`). If it fails to
+   resolve, call `list_repos`. If `savvagent/tower` is truly
    unregistered, do **not** `register_repo` it yourself — registering a
    repo is a one-time human decision, not something an unattended scan
    should make silently on a resolution failure. Report the failure (which
    slugs ARE registered, per `list_repos`) for a human to act on, and stop.
-3. `gh issue list --repo savvagent/otto-factory --state open --json
+3. `gh issue list --repo savvagent/tower --state open --json
    number,labels,authorAssociation --limit 500` — collect every open issue's
    number, labels, and `authorAssociation`. Deliberately not `title`: Step 1
    only buckets by association/labels and returns issue *numbers* (per its
@@ -85,7 +85,9 @@ context) with this task:
 6. `list_jobs` for that repo slug, with no `status` filter and an explicit
    `limit` (e.g. `1000` — don't rely on the server's unstated default,
    which may be much smaller). For each job with a `ticketRef` matching
-   `savvagent/otto-factory#<n>`, bucket it:
+   `savvagent/tower#<n>` (or the same `<n>` under the repo's old names,
+   `savvagent/otto-tower#<n>` and `savvagent/otto-factory#<n>`, which jobs
+   queued before the GitHub renames still carry), bucket it:
    - `pending` / `in-progress` / `active` / `completed` → "already handled",
      skip permanently.
    - `failed` / `cancelled` → "needs a human call", do **not** auto-requeue
@@ -94,7 +96,7 @@ context) with this task:
    further than this single call can see (this tool has no pagination
    cursor) — note that as "job list possibly truncated" rather than
    silently trusting a complete view.
-7. `gh label list --repo savvagent/otto-factory --json name` — this repo's
+7. `gh label list --repo savvagent/tower --json name` — this repo's
    label set includes at minimum `bug`, `enhancement`, `documentation`,
    `duplicate`, `invalid`, `wontfix`, `question`, `good first issue`, and
    `help wanted`. Fetch it once here so Step 2's per-issue subagents don't
@@ -126,7 +128,7 @@ message firing hundreds of concurrent subagents against a large backlog is
 not a batch, it's a rate-limit incident. Give each subagent the issue number,
 the repo slug, and the label name list from Step 1, and this task:
 
-1. `gh issue view <n> --repo savvagent/otto-factory --json
+1. `gh issue view <n> --repo savvagent/tower --json
    authorAssociation,state,labels` — deliberately not `title,body` yet: the
    trust check below must run before the untrusted body ever enters this
    subagent's context.
@@ -141,7 +143,7 @@ the repo slug, and the label name list from Step 1, and this task:
    queue it, and do not fetch `title`/`body`. Return `#<n> — skipped
    (closed since roster)` and skip the rest of this task.
 4. Now that both checks above have passed, fetch the body:
-   `gh issue view <n> --repo savvagent/otto-factory --json title,body`.
+   `gh issue view <n> --repo savvagent/tower --json title,body`.
 5. Check that exactly one type label — `bug`, `enhancement`, or `documentation` — is
    present:
    - **Missing entirely.** Infer the type from the title/body: language describing
@@ -149,7 +151,7 @@ the repo slug, and the label name list from Step 1, and this task:
      new capability or a change to existing behavior → `enhancement`; a change touching
      only docs/README/comment content → `documentation`. Confirm the inferred label
      actually exists in the label list you were given, then add it with
-     `gh issue edit <n> --repo savvagent/otto-factory --add-label "<label>"`. If the
+     `gh issue edit <n> --repo savvagent/tower --add-label "<label>"`. If the
      inferred label is **not** in the label list you were given, don't guess further —
      return `#<n> — needs human triage (inferred label not found in repo's label set)`
      and skip the rest of this task, same shape as the other human-triage branches.
@@ -168,7 +170,7 @@ the repo slug, and the label name list from Step 1, and this task:
 6. Once typed (or if it already was), queue it:
    - `add_job` with `repo` = the slug you were given, `title` = the issue
      title, `description` = the issue body (post-fix, if any) plus the issue URL,
-     `ticketRef` = `savvagent/otto-factory#<n>`, and `idempotencyKey` =
+     `ticketRef` = `savvagent/tower#<n>`, and `idempotencyKey` =
      `otto-tower-scanner-issue-<n>` (guards against a dropped-connection retry
      double-queueing).
    - If `add_job` fails because that `idempotencyKey` was already used with
@@ -177,10 +179,10 @@ the repo slug, and the label name list from Step 1, and this task:
      just got re-typed out of `question` in step 2 above and wasn't visible
      as "already handled" yet). Do not treat this as a fresh error: run
      `list_jobs` for this repo, find the job whose `ticketRef` is
-     `savvagent/otto-factory#<n>`, and use that job's id in your report as
+     `savvagent/tower#<n>` (or an old-name form of it, as in Step 1), and use that job's id in your report as
      "already queued" instead of retrying or escalating.
    - Otherwise, `link_ticket` on the newly returned job with
-     `tracker: "github"` and `ticketRef: "savvagent/otto-factory#<n>"` —
+     `tracker: "github"` and `ticketRef: "savvagent/tower#<n>"` —
      `add_job`'s own `ticketRef` records it, but `link_ticket` is what
      makes future job-status transitions write back to the issue as
      comments, which is the point of linking it. If `link_ticket` fails
@@ -221,7 +223,7 @@ one-line result. Do not re-fetch the issue, the job, or re-run `list_jobs` to
 Output one concise summary:
 
 ```
-Savvagent Tower Scanner — savvagent/otto-factory
+Savvagent Tower Scanner — savvagent/tower
 
 Queued (<n>):
   #<n> — queued as <job-id> (type: ok)

@@ -33,8 +33,8 @@ tower-testkit = { path = "crates/tower-testkit" }
 # renamed its crates from `otto-*` to `savvagent-*`. That release's `savvagent-resource`
 # accepts only the Savvagent `sav_at_`/`sav_pat_` token prefixes, so the platform must be
 # minting those before this service ships with this pin.
-savvagent-tenant = { git = "https://github.com/savvagent/otto-platform", rev = "063472cdb4eef7229d6732578cf061fd963996a4" }
-savvagent-resource = { git = "https://github.com/savvagent/otto-platform", rev = "063472cdb4eef7229d6732578cf061fd963996a4" }
+savvagent-tenant = { git = "https://github.com/savvagent/platform", rev = "063472cdb4eef7229d6732578cf061fd963996a4" }
+savvagent-resource = { git = "https://github.com/savvagent/platform", rev = "063472cdb4eef7229d6732578cf061fd963996a4" }
 
 sqlx = { version = "0.8", default-features = false, features = [
   "runtime-tokio", "tls-rustls", "postgres", "chrono", "uuid", "macros", "migrate", "json",

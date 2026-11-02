@@ -11,7 +11,7 @@ template's heading — honor it. If the runtime exposes only generic subagent ty
 body into a `general` subagent unchanged; the reviewer's identity lives in the prompt, not in the
 type string.
 
-`<ref>` below is the source reference: a GitHub issue (`savvagent/otto-factory#123`) or — on the
+`<ref>` below is the source reference: a GitHub issue (`savvagent/tower#123`) or — on the
 ticketless path — the captured task brief.
 
 ---
@@ -260,7 +260,7 @@ Agent tool:
   subagent_type: rust-pro
   description: "Rust review: PR #<N>"
   prompt: |
-    Review the Rust in PR #<N> of savvagent/otto-factory (`gh pr diff <N>`), for ref <ref>.
+    Review the Rust in PR #<N> of savvagent/tower (`gh pr diff <N>`), for ref <ref>.
 
     Judge idiomatic Rust against this repo's conventions:
     - Ownership, lifetimes, and borrow discipline; no needless clones or Arc<Mutex<...>> where a
@@ -287,7 +287,7 @@ Agent tool:
   subagent_type: architect-reviewer
   description: "Architecture review: PR #<N>"
   prompt: |
-    Review PR #<N> of savvagent/otto-factory (`gh pr diff <N>`) for architectural consistency, for
+    Review PR #<N> of savvagent/tower (`gh pr diff <N>`) for architectural consistency, for
     ref <ref>. Read CLAUDE.md at the repo root first — it is the conventions document of record.
 
     Judge:
@@ -320,7 +320,7 @@ Agent tool:
   subagent_type: security-auditor
   description: "Security review: PR #<N>"
   prompt: |
-    Perform an independent security review of PR #<N> in savvagent/otto-factory.
+    Perform an independent security review of PR #<N> in savvagent/tower.
 
     Read ONLY the diff: `gh pr diff <N>`.
     Do NOT read the PR description, the issue, the spec, the plan, or any summary of intent. Your
@@ -354,7 +354,7 @@ Agent tool:
   subagent_type: general-purpose
   description: "Address PR review feedback"
   prompt: |
-    You are addressing PR review feedback on PR #<N> of savvagent/otto-factory, for <ref>.
+    You are addressing PR review feedback on PR #<N> of savvagent/tower, for <ref>.
     Follow otto-tower-development requirements (Phase 4 step 9).
 
     Your job:

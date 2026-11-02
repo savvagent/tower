@@ -7,7 +7,7 @@ Guidance for Claude Code working in this repository.
 **Savvagent Tower** is a hosted, multi-tenant MCP server for coordinating agentic coding work
 across enterprises and teams. Server-only — no TUI, no PTY, no local binary, no plugin.
 
-It is a **resource server of the Savvagent platform** (`savvagent/otto-platform`). The platform
+It is a **resource server of the Savvagent platform** (`savvagent/platform`). The platform
 is the OAuth authorization server and the system of record for identity (accounts, orgs,
 teams, members), SSO, and billing; Savvagent Tower holds only the coordination domain, in its
 own database, and asks the platform who a token belongs to. Nothing in this repository
@@ -24,9 +24,11 @@ rebranded to **Savvagent Tower** (epic `savvagent/otto-platform#128`, phase 3 is
 `savvagent/otto-tower#279`). Everything a person or agent reads says Savvagent Tower: the MCP server
 name (`savvagent-tower`, so tools are `mcp__savvagent-tower__*`), the canonical endpoint
 `https://tower.savvagent.com/mcp`, the platform at `https://savvagent.com`, the console, the docs and
-the client skills. The identifiers below keep their old names until phase 4 (`savvagent/otto-tower#280`)
-renames the internals, and a new hit of `otto-tower` or `otto-factory` outside this list is a bug
-(`git grep -i -e otto-tower -e otto-factory` shows what is left):
+the client skills. Phase 4 (`savvagent/otto-tower#280`) renamed the crates to `tower-*` and the GitHub
+repos to `savvagent/tower` (formerly `savvagent/otto-tower`, before that `savvagent/otto-factory`) and
+`savvagent/platform` (formerly `savvagent/otto-platform`); GitHub redirects the old names. The
+identifiers below keep their old names, and a new hit of `otto-tower` or `otto-factory` outside this
+list is a bug (`git grep -i -e otto-tower -e otto-factory` shows what is left):
 
 - `otto-tower` where it is an identifier rather than a name people read: the billing service slug and the
   meter `otto-tower/jobs_completed` (`tower_billing::METER_JOBS_COMPLETED`, never renamed by the rebrand);
@@ -36,7 +38,8 @@ renames the internals, and a new hit of `otto-tower` or `otto-factory` outside t
   the `otto-tower-console` npm package name; the skill directories and names `otto-tower-development`,
   `otto-tower-scanner` and `otto-tower-worker` (and the `otto-tower-worker:trio-cleared:` marker); the
   `otto-tower-release` GitHub App named in `ci.yml`; the `.test` hostnames in the test constants; the
-  `savvagent/otto-tower` repo slug; and the platform's own repo `savvagent/otto-platform`.
+  Savvagent Tower registration slug `otto-tower` for this repo (a registration slug cannot change; its
+  display name is now `tower`, and the GitHub repo it names is `savvagent/tower`).
 - The old hosts `otto-tower.savvagent.com` and `otto-factory.savvagent.com`, which are redirect-only
   (`savvagent/otto-platform#135`): in `OF_REDIRECT_HOSTS` in `fly.toml` (a `308` to the same path and
   query on `tower.savvagent.com`, for every method and path) and in the runbooks in `docs/deploy/fly.md`.
@@ -50,8 +53,10 @@ renames the internals, and a new hit of `otto-tower` or `otto-factory` outside t
   `otto_factory` database and the `factory` Postgres role.
 - The Fly app `otto-factory-mcp` and its `fly.dev` host.
 - The Rust type `Factory`.
-- `savvagent/otto-factory#NNN` issue references, and the repo slug `savvagent/otto-factory` itself
-  until the GitHub repo is renamed (a separate human step).
+- `savvagent/otto-factory#NNN` and `savvagent/otto-tower#NNN` issue references, which GitHub redirects
+  to `savvagent/tower`, and the old-name `ticketRef` forms (`savvagent/otto-factory#<n>`,
+  `savvagent/otto-tower#<n>`) that `.github/skills/otto-tower-scanner/SKILL.md` and
+  `.github/skills/otto-tower-worker/SKILL.md` still accept on jobs queued before the rename.
 - The tracker trigger label `otto-factory` as stored data on bindings created before
   `savvagent/otto-factory#233` (new bindings default to `otto-tower`; no migration rewrites stored
   rows), and in the tests that set it explicitly.
@@ -266,7 +271,7 @@ reuses `savvagent-resource`'s own types, so the two cannot drift silently), and 
 under test the *real* `PlatformClient` pointed at it. It models audience (a token is active
 only for the resource server it was minted for), outages (`set_down`), usage dedupe by event
 id, and signed webhooks. A test about identity behavior belongs against it; a test about the
-platform's own behavior belongs in `savvagent/otto-platform`.
+platform's own behavior belongs in `savvagent/platform`.
 
 ## Development skills
 
@@ -287,7 +292,7 @@ compile-time layering discipline, not separate services.
 | Crate | Responsibility |
 |---|---|
 | `tower-core` | Domain + **all** SQL. No HTTP, no auth. Every tenant fn takes an `OrgId`. |
-| (otto-platform) | Two crates from `savvagent/otto-platform`, pinned by one rev in the workspace `Cargo.toml`: `savvagent-tenant` (the pinned-transaction/RLS substrate, `Cipher`, the audit-trail pattern) and `savvagent-resource` (the resource-server client: introspection, usage shipping, member/team lookups, webhook verification). Nothing else — no `otto-core`/`otto-auth`/`otto-billing`, and no identity tables. Never call `savvagent_tenant::Db::migrate` on this database; use `tower_core::migrate`. |
+| (otto-platform) | Two crates from `savvagent/platform`, pinned by one rev in the workspace `Cargo.toml`: `savvagent-tenant` (the pinned-transaction/RLS substrate, `Cipher`, the audit-trail pattern) and `savvagent-resource` (the resource-server client: introspection, usage shipping, member/team lookups, webhook verification). Nothing else — no `otto-core`/`otto-auth`/`otto-billing`, and no identity tables. Never call `savvagent_tenant::Db::migrate` on this database; use `tower_core::migrate`. |
 | `tower-mcp` | `rmcp` Streamable HTTP server, tool surface, bearer middleware (introspects at the platform). |
 | `tower-billing` | The price list (`classify`), what a completed job records (`completion`), enforcement of the platform's billing block (`meter`), and the usage outbox + shipper. |
 | `tower-trackers` | GitHub App + JIRA clients, webhook ingest, two-way sync. |

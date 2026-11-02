@@ -5,7 +5,7 @@ enterprises and teams.
 
 Server-only: no TUI, no PTY, no local bridge binary, no plugin. A team member adds one
 HTTPS endpoint to their coding agent, signs in through the browser once (at the
-[Savvagent platform](https://github.com/savvagent/otto-platform), which owns accounts, orgs, teams,
+[Savvagent platform](https://github.com/savvagent/platform), which owns accounts, orgs, teams,
 SSO, and billing), and from inside
 any registered git repository gets tools to add, claim, and complete jobs; to see what
 every other agent on the team is working on and where; and to keep GitHub Issues / JIRA in
@@ -150,7 +150,7 @@ cargo run -p tower-server
 
 It reads `.env`, applies migrations, and serves everything on one port (it needs a reachable
 platform to authenticate anyone; a local one is `savvagent-platform-server` from
-[`savvagent/otto-platform`](https://github.com/savvagent/otto-platform)):
+[`savvagent/platform`](https://github.com/savvagent/platform)):
 
 | Path | Surface |
 |---|---|
