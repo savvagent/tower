@@ -4,18 +4,18 @@
   import type { Snippet } from 'svelte';
 
   import '../app.css';
-  import { api } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { resolveAtBoot } from '$lib/locale';
-  import { orgOf, signIn } from '$lib/login';
-  import { platformHome, platformLink, type PlatformPage } from '$lib/platform';
-  import { PlatformHome } from '$lib/platform-home.svelte';
-  import { session } from '$lib/session.svelte';
-  import { APP_VERSION } from '$lib/version';
-  import Alert from '$lib/components/Alert.svelte';
-  import Loading from '$lib/components/Loading.svelte';
-  import Logo from '$lib/components/Logo.svelte';
+  import { api } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { resolveAtBoot } from '#lib/locale.ts';
+  import { orgOf, signIn } from '#lib/login.ts';
+  import { platformHome, platformLink, type PlatformPage } from '#lib/platform.ts';
+  import { PlatformHome } from '#lib/platform-home.svelte.ts';
+  import { session } from '#lib/session.svelte.ts';
+  import { APP_VERSION } from '#lib/version.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Loading from '#lib/components/Loading.svelte';
+  import Logo from '#lib/components/Logo.svelte';
 
   /**
    * Decide the language before anything renders.
@@ -97,7 +97,7 @@
       // pressed "sign out" is the worse of the two wrong answers.
     } finally {
       session.clear();
-      await goto('/', { replaceState: true });
+      await goto('/', { replace: true });
       signingOut = false;
     }
   }

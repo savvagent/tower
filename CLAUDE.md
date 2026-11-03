@@ -300,7 +300,7 @@ compile-time layering discipline, not separate services.
 | `tower-server` | Config, migrations, router assembly, the usage shipper task, graceful shutdown. |
 | `tower-testkit` | Dev-only. `MockPlatform`: the platform's resource-server API, in process. |
 
-`web/` is the console UI — SvelteKit 2 / Svelte 5 runes / Tailwind v4, TypeScript strict —
+`web/` is the console UI — SvelteKit 3 / Svelte 5 runes / Tailwind v4, TypeScript strict —
 built to static files that `tower-server` serves beside `/api`. See `web/README.md`.
 
 **Every SQL statement lives in `tower-core`.** A query in `tower-mcp` or `tower-web` is a bug — it
@@ -451,7 +451,7 @@ audit trail that they did not observe.
 > org — is a link into the platform's console (`web/src/lib/platform.ts`, from the
 > `platformUrl` that `GET /api/session` reports); the old identity pages and API calls are
 > gone. A session is signed in to **one org**: `/o/{slug}` for another is a sign-in for that
-> org (`/auth/login?org=`), and `$lib/login` refuses to repeat an attempt for the same org
+> org (`/auth/login?org=`), and `#lib/login` refuses to repeat an attempt for the same org
 > within a minute so a platform that signs the visitor into a different org cannot loop the
 > tab. The paragraphs below still describe the older shape where they mention the account's
 > locale, members, or the connect page.

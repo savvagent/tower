@@ -24,7 +24,7 @@
 import { mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { IDLE_AFTER, REFRESH_INTERVAL } from '$lib/poll.svelte';
+import { IDLE_AFTER, REFRESH_INTERVAL } from '#lib/poll.svelte.ts';
 
 const { gotoMock, replaceStateMock } = vi.hoisted(() => ({
   gotoMock: vi.fn((_url: URL | string, _opts?: Record<string, unknown>) => Promise.resolve()),
@@ -82,7 +82,9 @@ describe('the queue filters', () => {
     expect(gotoMock).toHaveBeenCalledTimes(1);
     const [url, opts] = gotoMock.mock.calls[0]!;
     expect(String(url)).toContain('status=pending');
-    expect(opts).toMatchObject({ replaceState: true, keepFocus: true, noScroll: true });
+    expect(opts).toMatchObject({ replace: true, reset: false });
+    // SvelteKit 2's spelling; Kit 3 would ignore it and push a history entry.
+    expect(opts).not.toHaveProperty('replaceState');
     expect(replaceStateMock).not.toHaveBeenCalled();
 
     unmount(instance);
@@ -113,7 +115,9 @@ describe('the queue filters', () => {
     expect(gotoMock).toHaveBeenCalledTimes(1);
     const [url, opts] = gotoMock.mock.calls[0]!;
     expect(String(url)).toBe('/o/acme/queue');
-    expect(opts).toMatchObject({ replaceState: true, keepFocus: true, noScroll: true });
+    expect(opts).toMatchObject({ replace: true, reset: false });
+    // SvelteKit 2's spelling; Kit 3 would ignore it and push a history entry.
+    expect(opts).not.toHaveProperty('replaceState');
     expect(replaceStateMock).not.toHaveBeenCalled();
 
     unmount(instance);

@@ -12,7 +12,7 @@
 import { mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { REFRESH_INTERVAL } from '$lib/poll.svelte';
+import { REFRESH_INTERVAL } from '#lib/poll.svelte.ts';
 import Harness from './OrgPageHarness.svelte';
 
 const stats = {

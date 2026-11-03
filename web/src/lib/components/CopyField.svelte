@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { copy } from '$lib/format';
-  import { m } from '$lib/paraglide/messages';
+  import { copy } from '#lib/format.ts';
+  import { m } from '#lib/paraglide/messages.js';
   import Button from './Button.svelte';
 
   /**

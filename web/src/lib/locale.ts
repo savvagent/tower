@@ -22,7 +22,7 @@
  * removes a whole class of half-translated-screen bugs.
  */
 
-import { baseLocale, locales, overwriteGetLocale } from '$lib/paraglide/runtime';
+import { baseLocale, locales, overwriteGetLocale } from '#lib/paraglide/runtime.js';
 
 export type Locale = (typeof locales)[number];
 

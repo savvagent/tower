@@ -2,11 +2,11 @@
   import { page } from '$app/state';
   import type { Snippet } from 'svelte';
 
-  import { m } from '$lib/paraglide/messages';
-  import { signIn } from '$lib/login';
-  import { OrgContext, provideOrg } from '$lib/org.svelte';
-  import { session } from '$lib/session.svelte';
-  import Loading from '$lib/components/Loading.svelte';
+  import { m } from '#lib/paraglide/messages.js';
+  import { signIn } from '#lib/login.ts';
+  import { OrgContext, provideOrg } from '#lib/org.svelte.ts';
+  import { session } from '#lib/session.svelte.ts';
+  import Loading from '#lib/components/Loading.svelte';
 
   let { children }: { children: Snippet } = $props();
 
@@ -35,7 +35,7 @@
    * visitor has to sign in *for that org* (`/auth/login?org=…`, which the
    * platform answers with that org if they belong to it). The server enforces the
    * same thing from its side — an API call for another org is
-   * `401 org_session_mismatch`, and `$lib/api` sends the tab through the same
+   * `401 org_session_mismatch`, and `#lib/api` sends the tab through the same
    * sign-in.
    *
    * If sign-in comes straight back to the same mismatch, the visitor does not

@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { api } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { LINK, around } from '$lib/labels';
-  import { useOrg } from '$lib/org.svelte';
-  import { relative } from '$lib/format';
-  import { beginConnect } from '$lib/trackerState';
+  import { api } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { LINK, around } from '#lib/labels.ts';
+  import { useOrg } from '#lib/org.svelte.ts';
+  import { relative } from '#lib/format.ts';
+  import { beginConnect } from '#lib/trackerState.ts';
   import type {
     ProviderSetup,
     TrackerConnection,
     TrackerConnections,
     TrackerProvider
-  } from '$lib/types';
-  import Alert from '$lib/components/Alert.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Card from '$lib/components/Card.svelte';
-  import Loading from '$lib/components/Loading.svelte';
+  } from '#lib/types.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Button from '#lib/components/Button.svelte';
+  import Card from '#lib/components/Card.svelte';
+  import Loading from '#lib/components/Loading.svelte';
 
   /**
    * Connecting a tracker to this org.

@@ -1,11 +1,11 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { m } from '$lib/paraglide/messages';
-  import { session } from '$lib/session.svelte';
-  import Alert from '$lib/components/Alert.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Loading from '$lib/components/Loading.svelte';
+  import { m } from '#lib/paraglide/messages.js';
+  import { session } from '#lib/session.svelte.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Button from '#lib/components/Button.svelte';
+  import Loading from '#lib/components/Loading.svelte';
 
   /**
    * `/` is Savvagent Tower's public front page.
@@ -21,7 +21,7 @@
    */
   $effect(() => {
     if (!session.ready || !session.info) return;
-    void goto(`/o/${session.info.org.slug}`, { replaceState: true });
+    void goto(`/o/${session.info.org.slug}`, { replace: true });
   });
 
   const LOGIN_ERRORS: Record<string, () => string> = {

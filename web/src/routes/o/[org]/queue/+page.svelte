@@ -2,20 +2,20 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
 
-  import { api } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { useOrg } from '$lib/org.svelte';
-  import { relative } from '$lib/format';
-  import { statusLabel } from '$lib/labels';
-  import { isClaimStranded } from '$lib/jobs';
-  import { Poller } from '$lib/poll.svelte';
-  import { fatalApiFailure } from '$lib/poll-fatal';
-  import type { Job, JobStatus, Repo } from '$lib/types';
-  import Alert from '$lib/components/Alert.svelte';
-  import Empty from '$lib/components/Empty.svelte';
-  import Loading from '$lib/components/Loading.svelte';
-  import StatusPill from '$lib/components/StatusPill.svelte';
+  import { api } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { useOrg } from '#lib/org.svelte.ts';
+  import { relative } from '#lib/format.ts';
+  import { statusLabel } from '#lib/labels.ts';
+  import { isClaimStranded } from '#lib/jobs.ts';
+  import { Poller } from '#lib/poll.svelte.ts';
+  import { fatalApiFailure } from '#lib/poll-fatal.ts';
+  import type { Job, JobStatus, Repo } from '#lib/types.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Empty from '#lib/components/Empty.svelte';
+  import Loading from '#lib/components/Loading.svelte';
+  import StatusPill from '#lib/components/StatusPill.svelte';
 
   /**
    * The queue, read-only.
@@ -27,12 +27,13 @@
    * The console's job is to answer "what is happening, and why is my agent
    * waiting" — see the leases on the Repos page for the second half of that.
    *
-   * Filters live in the URL so a view can be linked to. `goto(..., { replaceState: true })`
+   * Filters live in the URL so a view can be linked to. `goto(..., { replace: true })`
    * — not bare `replaceState` from `$app/navigation`, which never updates the reactive
    * `page.url` this page's filters read — applies a filter by actually navigating while
    * still replacing the current history entry: changing a filter is not a place in
    * history to go back to, and a dozen entries per session makes the browser's back
-   * button useless.
+   * button useless. `reset: false` keeps focus on the control and the scroll position
+   * where they were, as a filter change should.
    */
 
   const org = useOrg();
@@ -114,17 +115,18 @@
    * `navError`'s own `Alert`, rendered independently of the job poll's.
    */
   function applyFilters(url: URL | string) {
-    void goto(url, { replaceState: true, keepFocus: true, noScroll: true }).catch((e: unknown) => {
+    void goto(url, { replace: true, reset: false }).catch((e: unknown) => {
       navError = messageFor(e, m.queue_load_failed());
     });
   }
 
   function setFilter(key: string, value: string | undefined) {
-    const url = new URL(page.url);
+    // `page.url` is read-only (SvelteKit 3), so edit a copy of it.
+    const url = new URL(page.url.href);
     if (value === undefined || value === '') url.searchParams.delete(key);
     else url.searchParams.set(key, value);
-    // `page.state` is intentionally not passed through: this page never calls
-    // `pushState` or otherwise sets custom page state, so there is nothing to carry.
+    // `page.state` is intentionally not passed through: this page never makes a
+    // shallow navigation or otherwise sets custom page state, so there is nothing to carry.
     applyFilters(url);
   }
 

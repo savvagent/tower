@@ -1,4 +1,4 @@
-import type { Job } from '$lib/types';
+import type { Job } from '#lib/types.ts';
 
 /**
  * True for an in-progress/active job whose claim has lapsed — nobody is

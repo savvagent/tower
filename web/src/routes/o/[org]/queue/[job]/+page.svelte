@@ -1,17 +1,17 @@
 <script lang="ts">
   import { page } from '$app/state';
 
-  import { api, ApiError } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { useOrg } from '$lib/org.svelte';
-  import { absolute, relative } from '$lib/format';
-  import { isClaimStranded } from '$lib/jobs';
-  import type { JobDetail, Repo } from '$lib/types';
-  import Alert from '$lib/components/Alert.svelte';
-  import Card from '$lib/components/Card.svelte';
-  import Loading from '$lib/components/Loading.svelte';
-  import StatusPill from '$lib/components/StatusPill.svelte';
+  import { api, ApiError } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { useOrg } from '#lib/org.svelte.ts';
+  import { absolute, relative } from '#lib/format.ts';
+  import { isClaimStranded } from '#lib/jobs.ts';
+  import type { JobDetail, Repo } from '#lib/types.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Card from '#lib/components/Card.svelte';
+  import Loading from '#lib/components/Loading.svelte';
+  import StatusPill from '#lib/components/StatusPill.svelte';
 
   /**
    * One job.

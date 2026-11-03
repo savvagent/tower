@@ -6,7 +6,7 @@
    * layout on purpose — so a test that mounts the page directly is testing a
    * routing mistake. This is the smallest thing that is not one.
    */
-  import { OrgContext, provideOrg } from '$lib/org.svelte';
+  import { OrgContext, provideOrg } from '#lib/org.svelte.ts';
   import Page from './+page.svelte';
 
   let { slug }: { slug: string } = $props();
