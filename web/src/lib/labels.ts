@@ -12,8 +12,8 @@
  * pills beside it.
  */
 
-import { m } from '$lib/paraglide/messages';
-import type { JobStatus, Role } from '$lib/types';
+import { m } from '#lib/paraglide/messages.js';
+import type { JobStatus, Role } from '#lib/types.ts';
 
 export function statusLabel(status: JobStatus): string {
   switch (status) {

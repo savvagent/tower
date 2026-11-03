@@ -23,7 +23,7 @@
  *
  * **A dead session is handled here, once.** Any response saying the session is
  * gone (`unauthenticated`) or is for another org (`org_session_mismatch`) sends
- * the whole tab through sign-in again (`$lib/login`), so no page has to.
+ * the whole tab through sign-in again (`#lib/login`), so no page has to.
  */
 
 import { reauthenticate } from './login';

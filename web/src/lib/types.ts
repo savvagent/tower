@@ -39,7 +39,7 @@ export interface SessionUser {
  *
  * `platformUrl` is where the Savvagent platform's own console lives — members, teams,
  * SSO, usage, tokens, the account, and the list of orgs are managed there, not
- * here (`$lib/platform`).
+ * here (`#lib/platform`).
  */
 export interface SessionInfo {
   user: SessionUser;

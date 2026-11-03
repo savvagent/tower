@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { api } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { LINK, around } from '$lib/labels';
-  import { useOrg } from '$lib/org.svelte';
-  import { relative, slugPreview } from '$lib/format';
-  import type { Lease, Repo, RepoListItem, TrackerBinding, TrackerProvider } from '$lib/types';
-  import Alert from '$lib/components/Alert.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import Card from '$lib/components/Card.svelte';
-  import Empty from '$lib/components/Empty.svelte';
-  import Field from '$lib/components/Field.svelte';
-  import Loading from '$lib/components/Loading.svelte';
+  import { api } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { LINK, around } from '#lib/labels.ts';
+  import { useOrg } from '#lib/org.svelte.ts';
+  import { relative, slugPreview } from '#lib/format.ts';
+  import type { Lease, Repo, RepoListItem, TrackerBinding, TrackerProvider } from '#lib/types.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Button from '#lib/components/Button.svelte';
+  import Card from '#lib/components/Card.svelte';
+  import Empty from '#lib/components/Empty.svelte';
+  import Field from '#lib/components/Field.svelte';
+  import Loading from '#lib/components/Loading.svelte';
 
   /**
    * Repos, and who is holding a lease on one right now.

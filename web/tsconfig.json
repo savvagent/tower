@@ -1,5 +1,9 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
+  // SvelteKit 3 generates the base (route types, `$app/*`) at `svelte-kit sync`
+  // and no longer chooses the files; `include` and `exclude` are ours. Paraglide's
+  // compiled `.js` is excluded because it is generated and its `.d.ts` siblings
+  // already type every import of it — the same files Kit 2's config checked.
+  "extends": "$app/tsconfig",
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
@@ -11,5 +15,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "moduleResolution": "bundler"
-  }
+  },
+  "include": ["src", "test", "*"],
+  "exclude": ["src/service-worker", "src/lib/paraglide/**/*.js"]
 }

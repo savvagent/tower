@@ -1,19 +1,19 @@
 <script lang="ts">
-  import { api } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { currentLocale } from '$lib/locale';
-  import { useOrg } from '$lib/org.svelte';
-  import { relative } from '$lib/format';
-  import { roleLabel, statusLabel } from '$lib/labels';
-  import { Poller } from '$lib/poll.svelte';
-  import { fatalApiFailure } from '$lib/poll-fatal';
-  import type { Job, QueueStats, Repo } from '$lib/types';
-  import Alert from '$lib/components/Alert.svelte';
-  import Card from '$lib/components/Card.svelte';
-  import Empty from '$lib/components/Empty.svelte';
-  import Loading from '$lib/components/Loading.svelte';
-  import StatusPill from '$lib/components/StatusPill.svelte';
+  import { api } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { currentLocale } from '#lib/locale.ts';
+  import { useOrg } from '#lib/org.svelte.ts';
+  import { relative } from '#lib/format.ts';
+  import { roleLabel, statusLabel } from '#lib/labels.ts';
+  import { Poller } from '#lib/poll.svelte.ts';
+  import { fatalApiFailure } from '#lib/poll-fatal.ts';
+  import type { Job, QueueStats, Repo } from '#lib/types.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Card from '#lib/components/Card.svelte';
+  import Empty from '#lib/components/Empty.svelte';
+  import Loading from '#lib/components/Loading.svelte';
+  import StatusPill from '#lib/components/StatusPill.svelte';
 
   /**
    * The overview: what the queue is doing, what it is doing it to, and how much

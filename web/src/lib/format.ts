@@ -11,7 +11,7 @@
  * ordinary module — no runes, nothing to keep in sync.
  */
 
-import { currentLocale } from '$lib/locale';
+import { currentLocale } from '#lib/locale.ts';
 
 /**
  * "3 minutes ago", "in 2 days".

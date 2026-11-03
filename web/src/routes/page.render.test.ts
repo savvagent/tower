@@ -16,7 +16,7 @@ vi.mock('$app/navigation', () => ({
 }));
 
 import { page } from '$app/state';
-import { session } from '$lib/session.svelte';
+import { session } from '#lib/session.svelte.ts';
 import Page from './+page.svelte';
 
 let container: HTMLElement;

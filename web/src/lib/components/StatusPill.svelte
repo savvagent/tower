@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { statusLabel } from '$lib/labels';
-  import type { JobStatus } from '$lib/types';
+  import { statusLabel } from '#lib/labels.ts';
+  import type { JobStatus } from '#lib/types.ts';
 
   /**
    * Colour *and* the word, never colour alone. A queue read by someone with a

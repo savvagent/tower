@@ -2,12 +2,12 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
 
-  import { api } from '$lib/api';
-  import { messageFor } from '$lib/errors';
-  import { m } from '$lib/paraglide/messages';
-  import { completeConnect } from '$lib/trackerState';
-  import Alert from '$lib/components/Alert.svelte';
-  import Loading from '$lib/components/Loading.svelte';
+  import { api } from '#lib/api.ts';
+  import { messageFor } from '#lib/errors.ts';
+  import { m } from '#lib/paraglide/messages.js';
+  import { completeConnect } from '#lib/trackerState.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Loading from '#lib/components/Loading.svelte';
 
   /**
    * Where GitHub and Atlassian send the browser back.
@@ -15,7 +15,7 @@
    * **Not under `/o/[org]/`, and it cannot be.** A redirect URI is one static
    * string registered with the provider; it cannot carry an org slug that
    * varies per customer. The org rides in the OAuth `state` instead, alongside
-   * a nonce this browser minted before it left — see `$lib/trackerState`.
+   * a nonce this browser minted before it left — see `#lib/trackerState`.
    *
    * **The page renders; the button-equivalent POSTs.** The authorization code
    * arrives in this URL, and everything that spends a single-use credential in
@@ -64,7 +64,7 @@
           code,
           ...(Number.isSafeInteger(installationId) ? { installationId } : {})
         });
-        await goto(`/o/${pending.org}/trackers`, { replaceState: true });
+        await goto(`/o/${pending.org}/trackers`, { replace: true });
       } catch (e) {
         error = messageFor(e, m.trackercb_error_fallback());
       }

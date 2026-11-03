@@ -9,7 +9,7 @@
    */
   import { untrack } from 'svelte';
   import { page } from '$app/state';
-  import { OrgContext, provideOrg } from '$lib/org.svelte';
+  import { OrgContext, provideOrg } from '#lib/org.svelte.ts';
   import Page from './+page.svelte';
 
   let { slug, url }: { slug: string; url?: URL } = $props();

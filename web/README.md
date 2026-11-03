@@ -1,6 +1,6 @@
 # `web/` — the Savvagent Tower console
 
-SvelteKit 2 · Svelte 5 (runes) · Tailwind v4 · TypeScript, strict.
+SvelteKit 3 · Svelte 5 (runes) · Tailwind v4 · TypeScript, strict.
 
 What a human touches in Savvagent Tower: repos and their live leases, a read-only queue,
 tracker connections, and the audit log. Sign-in, members, teams, SSO, usage, and tokens are
@@ -51,13 +51,13 @@ server-side, and sets `__Host-of_session`. The browser holds only that opaque co
 
 A session is signed in to **exactly one org** (the platform's token is bound to it). So
 `/o/{slug}` for any other org is a sign-in for that org (`/auth/login?org={slug}`), and an
-API `401 unauthenticated` / `org_session_mismatch` anywhere does the same (`$lib/api`,
-`$lib/login`). One attempt per org per minute: if the platform signs the visitor in to a
+API `401 unauthenticated` / `org_session_mismatch` anywhere does the same (`#lib/api`,
+`#lib/login`). One attempt per org per minute: if the platform signs the visitor in to a
 different org anyway, they are not a member of the one asked for, and the page says "no such
 organization" rather than looping.
 
 Everything identity-shaped — members, teams, SSO, usage, tokens, the account, switching
-org — is a link into the platform's console (`$lib/platform`, from the `platformUrl` the
+org — is a link into the platform's console (`#lib/platform`, from the `platformUrl` the
 session reports). The old identity pages and API calls are gone.
 
 ## What holds across the app

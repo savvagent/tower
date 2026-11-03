@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { mount, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fixtureDoc } from '$lib/openapi.fixtures';
+import { fixtureDoc } from '#lib/openapi.fixtures.ts';
 import Page from './+page.svelte';
 
 describe('/docs/api page', () => {

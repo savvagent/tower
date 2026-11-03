@@ -1,8 +1,8 @@
 <script lang="ts">
   import { tick } from 'svelte';
-  import { groupByTag, schemaSummary, type OpenApiDocument, type TagGroup } from '$lib/openapi';
-  import Alert from '$lib/components/Alert.svelte';
-  import Loading from '$lib/components/Loading.svelte';
+  import { groupByTag, schemaSummary, type OpenApiDocument, type TagGroup } from '#lib/openapi.ts';
+  import Alert from '#lib/components/Alert.svelte';
+  import Loading from '#lib/components/Loading.svelte';
 
   /**
    * A human-readable rendering of `/api/openapi.json` — the raw document is

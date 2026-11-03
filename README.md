@@ -85,7 +85,7 @@ plus the console UI for it) is complete —
 | `tower-web` | ✅ console API (session cookie or platform bearer token), console sign-in, tracker console, platform webhooks |
 | `tower-server` | ✅ config, startup migrations, router assembly, health, usage shipper |
 | `tower-testkit` | ✅ in-process mock of the platform, for tests |
-| `web/` | ✅ SvelteKit 2 / Svelte 5 console — signs in through the platform |
+| `web/` | ✅ SvelteKit 3 / Svelte 5 console — signs in through the platform |
 
 > The console signs in through the platform (OAuth authorization code + PKCE) and keeps its
 > own session cookie; members, teams, SSO, usage, and tokens are managed at the platform,
@@ -226,7 +226,7 @@ resource, set the secrets) is a checklist in [`docs/deploy/fly.md`](docs/deploy/
 | `crates/tower-server` | The binary: config, migrations, router assembly, health, usage shipper. |
 | `crates/tower-testkit` | Dev-only mock of the platform's resource-server API. |
 | `Dockerfile`, `fly.toml` | The image and its Fly.io deployment. |
-| `web/` | SvelteKit 2 + Svelte 5 console. |
+| `web/` | SvelteKit 3 + Svelte 5 console. |
 
 ## Metering
 
