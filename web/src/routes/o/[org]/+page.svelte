@@ -2,7 +2,7 @@
   import { api } from '#lib/api.ts';
   import { messageFor } from '#lib/errors.ts';
   import { m } from '#lib/paraglide/messages.js';
-  import { currentLocale } from '#lib/locale.ts';
+  import { currentLocale } from '@savvagent/console-ui';
   import { useOrg } from '#lib/org.svelte.ts';
   import { relative } from '#lib/format.ts';
   import { roleLabel, statusLabel } from '#lib/labels.ts';

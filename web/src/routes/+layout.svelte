@@ -7,7 +7,7 @@
   import { api } from '#lib/api.ts';
   import { messageFor } from '#lib/errors.ts';
   import { m } from '#lib/paraglide/messages.js';
-  import { resolveAtBoot } from '#lib/locale.ts';
+  import { bootLocale } from '#lib/locale.ts';
   import { orgOf, signIn } from '#lib/login.ts';
   import { platformHome, platformLink, type PlatformPage } from '#lib/platform.ts';
   import { PlatformHome } from '#lib/platform-home.svelte.ts';
@@ -26,7 +26,7 @@
    * exist. It runs once, synchronously, ahead of the first paint, so no page
    * ever renders English and then snaps to Spanish.
    */
-  resolveAtBoot();
+  bootLocale();
 
   let { children }: { children: Snippet } = $props();
 
@@ -134,9 +134,7 @@
     { page: 'members', label: () => m.nav_platform_members() },
     { page: 'teams', label: () => m.nav_platform_teams() },
     { page: 'sso', label: () => m.nav_platform_sso() },
-    { page: 'usage', label: () => m.nav_platform_usage() },
-    { page: 'account', label: () => m.nav_platform_account() },
-    { page: 'orgs', label: () => m.nav_platform_switch_org() }
+    { page: 'usage', label: () => m.nav_platform_usage() }
   ];
 </script>
 
