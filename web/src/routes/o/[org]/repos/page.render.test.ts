@@ -289,3 +289,25 @@ describe('the repos page info affordance', () => {
     unmount(instance);
   });
 });
+
+describe('the repos page register form', () => {
+  it('titles the form card as an h2 heading, with nothing nested in it', async () => {
+    vi.stubGlobal('fetch', makeFetchMock());
+
+    const instance = mount(Harness, { target: container, props: { slug: 'acme', role: 'owner' } });
+    await settle();
+
+    const open = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.textContent?.trim() === 'Register a repo'
+    ) as HTMLButtonElement;
+    open.click();
+    await settle();
+
+    const title = container.querySelector('[data-slot="card-title"]');
+    expect(title?.tagName).toBe('H2');
+    expect(title?.textContent?.trim()).toBe('Register a repo');
+    expect(title?.querySelector('h1, h2, h3, h4, h5, h6')).toBeNull();
+
+    unmount(instance);
+  });
+});

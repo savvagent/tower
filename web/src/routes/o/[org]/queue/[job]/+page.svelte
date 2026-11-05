@@ -111,7 +111,7 @@
     {#if job.description}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle><h2>{m.job_description_title()}</h2></CardTitle>
+          <CardTitle level={2}>{m.job_description_title()}</CardTitle>
         </CardHeader>
         <CardContent>
           <p class="text-sm whitespace-pre-wrap text-muted-foreground">{job.description}</p>
@@ -126,7 +126,7 @@
     {#if job.status === 'completed' && job.result}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle><h2>{m.job_result_title()}</h2></CardTitle>
+          <CardTitle level={2}>{m.job_result_title()}</CardTitle>
         </CardHeader>
         <CardContent>
           <p class="text-sm whitespace-pre-wrap text-muted-foreground">{job.result}</p>
@@ -136,7 +136,7 @@
 
     <Card>
       <CardHeader class="border-b">
-        <CardTitle><h2>{m.job_details_title()}</h2></CardTitle>
+        <CardTitle level={2}>{m.job_details_title()}</CardTitle>
       </CardHeader>
       <CardContent>
         <dl class="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
@@ -222,7 +222,7 @@
     {#if job.dependsOn.length > 0}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle><h2>{m.job_waiting_on_title()}</h2></CardTitle>
+          <CardTitle level={2}>{m.job_waiting_on_title()}</CardTitle>
           <CardDescription>{m.job_waiting_on_description()}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -243,7 +243,7 @@
     {#if metadata}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle><h2>{m.job_metadata_title()}</h2></CardTitle>
+          <CardTitle level={2}>{m.job_metadata_title()}</CardTitle>
           <CardDescription>{m.job_metadata_description()}</CardDescription>
         </CardHeader>
         <CardContent>

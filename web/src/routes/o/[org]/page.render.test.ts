@@ -163,6 +163,22 @@ describe('the overview', () => {
     unmount(instance);
   });
 
+  it('titles its cards as h2 headings, with no heading nested inside another', async () => {
+    const instance = mount(Harness, { target: container, props: { slug: 'acme' } });
+    await settle();
+
+    const titles = [...container.querySelectorAll('[data-slot="card-title"]')];
+    expect(titles.map((t) => [t.tagName, t.textContent?.trim()])).toEqual([
+      ['H2', 'Recent jobs'],
+      ['H2', 'Repos']
+    ]);
+    expect(
+      container.querySelector(':is(h1, h2, h3, h4, h5, h6) :is(h1, h2, h3, h4, h5, h6)')
+    ).toBeNull();
+
+    unmount(instance);
+  });
+
   it('shows an error instead of the page when the first load fails', async () => {
     healthy = false;
     const instance = mount(Harness, { target: container, props: { slug: 'acme' } });

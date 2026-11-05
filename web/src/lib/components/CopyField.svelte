@@ -34,7 +34,7 @@
   {#if label}<span class="of-label">{label}</span>{/if}
   <div class="flex items-start gap-2">
     <code
-      class="of-mono flex-1 rounded-lg border border-input bg-muted/40 px-3 py-2 text-foreground"
+      class="of-mono flex-1 rounded-lg border border-border bg-muted/40 px-3 py-2 text-foreground"
       class:whitespace-pre-wrap={multiline}>{value}</code
     >
     <Button variant="outline" onclick={onCopy}>
