@@ -7,6 +7,7 @@ tracker connections, and the audit log. Sign-in, members, teams, SSO, usage, and
 the Savvagent platform's; the console signs in through it and links to it.
 
 ```bash
+export NODE_AUTH_TOKEN=$(gh auth token)   # read:packages, for @savvagent/console-ui (see below)
 npm install
 npm run dev      # Vite on :5173, proxying /api /auth /oauth /.well-known to OF_API_ORIGIN
 npm run check    # compile messages, check completeness, then svelte-check + tsc

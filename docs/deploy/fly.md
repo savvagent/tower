@@ -766,10 +766,12 @@ A push that fails `rust`, `web`, or `docker-build` never reaches `deploy` — `r
 check anywhere upstream skips the whole chain rather than attempting a deploy against broken CI.
 
 For an out-of-band deploy — re-deploying without a new commit, or deploying a specific
-historical SHA — the manual command still works exactly as before:
+historical SHA — run it by hand. The image's console stage installs `@savvagent/console-ui` from
+GitHub Packages, so the build needs a token with `read:packages`, passed as a build secret (it
+reaches only the Dockerfile's secret mount, never a layer):
 
 ```bash
-fly deploy -a otto-factory-mcp
+fly deploy -a otto-factory-mcp --build-secret NODE_AUTH_TOKEN="$(gh auth token)"
 ```
 
 which will build the Dockerfile, run migrations on startup, and pass the `/readyz`

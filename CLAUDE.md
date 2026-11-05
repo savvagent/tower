@@ -244,14 +244,14 @@ cargo test -p tower-core --test queue       # queue behaviour
 cargo clippy --all-targets -- -D warnings
 cargo fmt --all
 
-cd web && npm install
+cd web && NODE_AUTH_TOKEN=$(gh auth token) npm install   # @savvagent/console-ui is on GitHub Packages
 npm run check                 # svelte-check + tsc over worker/ — the console's `cargo test`
 npm run lint                  # prettier --check — the console's `cargo fmt --check`
 npm test                      # vitest — the Cloudflare Worker's routing rule
 npm run build                 # static bundle into web/build
 
 cargo run -p tower-server        # everything on one port, reading .env
-podman build -t otto-tower .   # console stage + rust stage + slim runtime
+podman build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN -t otto-tower .   # console + rust + runtime
 ```
 
 `OF_PUBLIC_URL`, `OF_PLATFORM_URL`, `OF_INTROSPECTION_SECRET`, `OF_PLATFORM_WEBHOOK_SECRET`,

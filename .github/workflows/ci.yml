@@ -139,6 +139,11 @@ jobs:
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # `packages: read` lets the job's own token install @savvagent/console-ui from GitHub
+    # Packages (web/.npmrc); the package grants this repo Actions read access.
+    permissions:
+      contents: read
+      packages: read
     defaults:
       run:
         working-directory: web
@@ -151,7 +156,10 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
 
+      # The token is scoped to the one step that installs; check, lint and test never see it.
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: npm run check
 
@@ -166,6 +174,10 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # The console stage installs @savvagent/console-ui from GitHub Packages.
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
 
@@ -192,6 +204,10 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # A BuildKit secret, mounted only for the Dockerfile's `npm ci`: never a build-arg,
+          # so it is in no layer and not in the build cache exported above.
+          secrets: |
+            NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
 
   # Enforces Conventional Commits on PR titles, which become the master commit on squash-merge --
   # release-please's version-bump computation reads a commit's type (feat/fix/...), so a title
@@ -310,14 +326,20 @@ jobs:
       name: production
       # Flipped to the tower.savvagent.com host (docs/deploy/fly.md, "Runbook: move to tower.savvagent.com").
       url: https://tower.savvagent.com
+    # `packages: read` is for the image's console stage, which installs @savvagent/console-ui
+    # from GitHub Packages on Fly's remote builder.
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # v1
 
+      # `--build-secret` reaches the Dockerfile's secret mount, never a layer. The token comes
+      # through the environment so it is not part of the command line flyctl logs.
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only -a otto-factory-mcp
+        run: flyctl deploy --remote-only -a otto-factory-mcp --build-secret NODE_AUTH_TOKEN="$NODE_AUTH_TOKEN"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

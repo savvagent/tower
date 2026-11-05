@@ -133,6 +133,7 @@ The console has its own gate, which is the same two checks in the other language
 
 ```bash
 cd web
+export NODE_AUTH_TOKEN=$(gh auth token)   # read:packages; @savvagent/console-ui is on GitHub Packages
 npm install
 npm run check     # svelte-check, strict
 npm run lint      # prettier --check
@@ -175,7 +176,7 @@ works perfectly.
 ## Deployment
 
 ```bash
-podman build -t otto-tower .
+podman build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN -t otto-tower .
 ```
 
 One image: the console bundle is built by a `node` stage, the binary by a `rust` stage, and
@@ -192,8 +193,12 @@ fly secrets set \
   OF_ENCRYPTION_KEY="$(openssl rand -base64 32)" \
   OF_INTROSPECTION_SECRET="sav_rs_…" \
   OF_PLATFORM_WEBHOOK_SECRET="sav_whsec_…"
-fly deploy
+fly deploy --build-secret NODE_AUTH_TOKEN="$(gh auth token)"
 ```
+
+The console stage installs `@savvagent/console-ui` from GitHub Packages, so every image build needs
+a token with `read:packages` as the `NODE_AUTH_TOKEN` build secret. It is mounted for the one
+`npm ci` and is in no layer; a build without it stops at that line.
 
 Migrations run at startup under a Postgres advisory lock, so several machines booting
 together is safe: the losers wait rather than racing through the same DDL.
