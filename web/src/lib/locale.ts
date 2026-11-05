@@ -44,12 +44,10 @@ export function migrateLegacyCache(store: LocaleStore | undefined = browserStore
  */
 export function bootLocale(): Locale {
   migrateLegacyCache();
-  // The package types the getter it installs as `() => string`; this runtime's
-  // `overwriteGetLocale` wants its own narrower `Locale` union. The package only
-  // ever resolves to a locale it supports, and it supports exactly this
-  // console's six (both `project.inlang` files list en, es, de, fr, it, hi), so
-  // the cast restates what is already true rather than widening anything.
-  return resolveAtBoot((getLocale) => overwriteGetLocale(() => getLocale() as Locale));
+  // The package hands each runtime a getter returning its own `Locale`, so this
+  // runtime's `overwriteGetLocale` is accepted as written: a runtime shipping
+  // fewer than the package's six locales would be a type error here.
+  return resolveAtBoot(overwriteGetLocale);
 }
 
 /** Reaching for `localStorage` is itself what throws when site data is blocked. */

@@ -265,7 +265,7 @@
   {#if showForm}
     <Card>
       <CardHeader class="border-b">
-        <CardTitle><h2>{m.repos_form_title()}</h2></CardTitle>
+        <CardTitle level={2}>{m.repos_form_title()}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onsubmit={register}>

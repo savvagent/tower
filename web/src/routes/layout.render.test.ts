@@ -20,6 +20,7 @@ import { goto } from '$app/navigation';
 import { page } from '$app/state';
 import { api } from '#lib/api.ts';
 import { session } from '#lib/session.svelte.ts';
+import { APP_VERSION } from '#lib/version.ts';
 import Harness from './LayoutHarness.svelte';
 
 const PLATFORM = 'https://savvagent.example';
@@ -98,6 +99,13 @@ function links(): HTMLAnchorElement[] {
   return [...container.querySelectorAll('a')];
 }
 
+/** The build version is shown in the footer as plain text, never as a link. */
+function expectPlainVersion() {
+  const footer = container.querySelector('footer');
+  expect(footer?.textContent).toContain(`v${APP_VERSION}`);
+  expect(links().some((a) => a.textContent?.includes(`v${APP_VERSION}`))).toBe(false);
+}
+
 describe('the root layout', () => {
   it('links back to the platform from the session, and renders the shared footer', async () => {
     setUrl('/o/acme');
@@ -118,6 +126,7 @@ describe('the root layout', () => {
     expect(links().some((a) => a.getAttribute('href') === '/docs/api')).toBe(true);
     // The footer's copyright is the shared footer's own link to the platform.
     expect(container.querySelector('footer a')?.getAttribute('href')).toBe(`${PLATFORM}/`);
+    expectPlainVersion();
     unmount(instance);
   });
 
@@ -145,6 +154,7 @@ describe('the root layout', () => {
     expect(links().some((a) => a.getAttribute('href') === '/auth/login')).toBe(true);
     expect(links().some((a) => a.textContent?.trim() === 'Savvagent')).toBe(false);
     expect(links().some((a) => a.getAttribute('href') === '/docs/api')).toBe(true);
+    expectPlainVersion();
     unmount(instance);
   });
 

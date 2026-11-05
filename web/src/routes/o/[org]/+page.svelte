@@ -186,7 +186,7 @@
     <div class="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader class="border-b">
-          <CardTitle><h2>{m.overview_recent_title()}</h2></CardTitle>
+          <CardTitle level={2}>{m.overview_recent_title()}</CardTitle>
           <CardDescription>{m.overview_recent_description()}</CardDescription>
           <CardAction>
             <a
@@ -232,7 +232,7 @@
       <div class="space-y-6">
         <Card>
           <CardHeader class="border-b">
-            <CardTitle><h2>{m.overview_repos_title()}</h2></CardTitle>
+            <CardTitle level={2}>{m.overview_repos_title()}</CardTitle>
             <CardDescription>{m.overview_repos_description()}</CardDescription>
             <CardAction>
               <a

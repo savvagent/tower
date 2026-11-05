@@ -126,7 +126,7 @@
         {@const connection = connectionFor(provider)}
         <Card>
           <CardHeader class="border-b">
-            <CardTitle><h2>{name}</h2></CardTitle>
+            <CardTitle level={2}>{name}</CardTitle>
           </CardHeader>
           <CardContent>
             {#if connection}

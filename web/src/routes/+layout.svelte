@@ -166,14 +166,7 @@
     { page: 'usage', label: () => m.nav_platform_usage() }
   ];
 
-  /**
-   * The version is a link only because the shared footer renders links; the API
-   * reference is the closest thing to release notes a customer can open.
-   */
-  const footerLinks = [
-    { label: m.nav_api_reference(), href: '/docs/api' },
-    { label: `v${APP_VERSION}`, href: '/docs/api' }
-  ];
+  const footerLinks = [{ label: m.nav_api_reference(), href: '/docs/api' }];
 </script>
 
 <!--
@@ -279,7 +272,11 @@
   </main>
 
   {#if platformUrl}
-    <ConsoleFooter {platformUrl} links={footerLinks} />
+    <ConsoleFooter {platformUrl} links={footerLinks}>
+      {#snippet meta()}
+        v{APP_VERSION}
+      {/snippet}
+    </ConsoleFooter>
   {:else}
     <footer
       class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t px-4 py-3 text-sm text-muted-foreground"
@@ -287,6 +284,7 @@
       {#each footerLinks as link (link.label)}
         <a href={link.href} class="hover:text-foreground">{link.label}</a>
       {/each}
+      <span>v{APP_VERSION}</span>
     </footer>
   {/if}
 </div>
