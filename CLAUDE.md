@@ -244,7 +244,7 @@ cargo test -p tower-core --test queue       # queue behaviour
 cargo clippy --all-targets -- -D warnings
 cargo fmt --all
 
-cd web && NODE_AUTH_TOKEN=$(gh auth token) npm install   # @savvagent/console-ui is on GitHub Packages
+cd web && NODE_AUTH_TOKEN=$(gh auth token) npm install   # GitHub Packages; needs `gh auth refresh -s read:packages` once
 npm run check                 # svelte-check + tsc over worker/ — the console's `cargo test`
 npm run lint                  # prettier --check — the console's `cargo fmt --check`
 npm test                      # vitest — the Cloudflare Worker's routing rule
@@ -453,8 +453,8 @@ audit trail that they did not observe.
 > gone. A session is signed in to **one org**: `/o/{slug}` for another is a sign-in for that
 > org (`/auth/login?org=`), and `#lib/login` refuses to repeat an attempt for the same org
 > within a minute so a platform that signs the visitor into a different org cannot loop the
-> tab. The paragraphs below still describe the older shape where they mention the account's
-> locale, members, or the connect page.
+> tab. The paragraphs below still describe the older shape where they mention members or the
+> connect page.
 
 **The shell is shared.** The header, footer, theme, locale resolution and the UI primitives
 (alert, button, card, field, input …) come from `@savvagent/console-ui`, pinned to an exact version

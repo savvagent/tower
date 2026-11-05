@@ -88,10 +88,7 @@
         </h2>
         <div class="space-y-4">
           {#each group.endpoints as endpoint (endpoint.operationId)}
-            <article
-              id={endpoint.operationId}
-              class="scroll-mt-4 rounded-xl bg-card px-4 py-3 text-card-foreground ring-1 ring-foreground/10"
-            >
+            <article id={endpoint.operationId} class="of-surface scroll-mt-4 px-4 py-3">
               <div class="flex flex-wrap items-center gap-2">
                 <span
                   class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs font-semibold text-foreground uppercase"

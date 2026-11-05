@@ -16,7 +16,9 @@ vi.mock('$app/navigation', () => ({
   goto: vi.fn(() => Promise.resolve())
 }));
 
+import { goto } from '$app/navigation';
 import { page } from '$app/state';
+import { api } from '#lib/api.ts';
 import { session } from '#lib/session.svelte.ts';
 import Harness from './LayoutHarness.svelte';
 
@@ -25,6 +27,8 @@ const PLATFORM = 'https://savvagent.example';
 let container: HTMLElement;
 let urlDescriptor: PropertyDescriptor | undefined;
 let discovery: string | undefined;
+/** When set, `/api/session` never answers, so the session stays unresolved. */
+let sessionHangs = false;
 
 function setUrl(path: string) {
   Object.defineProperty(page, 'url', {
@@ -36,6 +40,7 @@ function setUrl(path: string) {
 /** Every request the layout and the shared header make, answered without a network. */
 function fakeFetch(input: RequestInfo | URL): Promise<Response> {
   const url = String(input instanceof Request ? input.url : input);
+  if (url.endsWith('/api/session') && sessionHangs) return new Promise(() => {});
   if (url.endsWith('/services/v1.json')) {
     return Promise.resolve(Response.json({ version: 1, services: [] }));
   }
@@ -63,6 +68,7 @@ beforeEach(() => {
   document.body.appendChild(container);
   urlDescriptor = Object.getOwnPropertyDescriptor(page, 'url');
   discovery = undefined;
+  sessionHangs = false;
   vi.stubGlobal('fetch', vi.fn(fakeFetch));
   vi.stubGlobal(
     'matchMedia',
@@ -76,7 +82,17 @@ afterEach(() => {
   session.info = undefined;
   session.ready = false;
   vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+  document.documentElement.classList.remove('dark');
 });
+
+const SESSION = {
+  user: { id: 'u-1', email: 'ada@acme.test', name: 'Ada' },
+  org: { id: 'o-1', slug: 'acme', name: 'Acme', plan: 'team' },
+  role: 'owner' as const,
+  scopes: [],
+  platformUrl: PLATFORM
+};
 
 function links(): HTMLAnchorElement[] {
   return [...container.querySelectorAll('a')];
@@ -147,6 +163,51 @@ describe('the root layout', () => {
 
     expect(links().some((a) => a.textContent?.trim() === 'Savvagent')).toBe(false);
     expect(container.querySelector('[data-testid="child"]')).not.toBeNull();
+    unmount(instance);
+  });
+
+  it('follows a dark OS preference before anything else renders', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+    );
+    setUrl('/');
+    session.ready = true;
+    const instance = mount(Harness, { target: container });
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    unmount(instance);
+  });
+
+  it('shows no Sign in until the session answer is in', async () => {
+    setUrl('/');
+    discovery = PLATFORM;
+    sessionHangs = true;
+    session.info = undefined;
+    session.ready = false;
+    const instance = mount(Harness, { target: container });
+    await settle();
+    // Discovery waits for the session's answer too, so the plain header is up, empty-handed.
+    expect(container.querySelector('header')).not.toBeNull();
+    expect(links().some((a) => a.getAttribute('href') === '/auth/login')).toBe(false);
+    unmount(instance);
+  });
+
+  it('keeps sign-out working in the plain header when the address is refused', async () => {
+    const logout = vi.spyOn(api, 'logout').mockResolvedValue(undefined);
+    setUrl('/o/acme');
+    session.info = { ...SESSION, platformUrl: 'http://savvagent.example' };
+    session.ready = true;
+    const instance = mount(Harness, { target: container });
+    await settle();
+
+    const button = [...container.querySelectorAll('header button')].find(
+      (b) => b.textContent?.trim() === 'Sign out'
+    ) as HTMLButtonElement | undefined;
+    expect(button).toBeDefined();
+    button!.click();
+    await settle();
+    expect(logout).toHaveBeenCalledTimes(1);
+    expect(goto).toHaveBeenCalledWith('/', { replace: true });
     unmount(instance);
   });
 });

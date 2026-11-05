@@ -79,7 +79,7 @@ keeps no copy of the shell or its primitives.
 - `web/src/routes/+layout.svelte` renders `ConsoleHeader` and `ConsoleFooter`; no other header or
   footer markup exists in `web/src`.
 - `web/src/app.css` imports `@savvagent/console-ui/theme.css` and declares no palette of its own;
-  `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted([^-a-z]|$)|(text|bg|border)-accent([^-a-z]|$)|of-(card|input|label)' web/src`
+  `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted([^-a-z]|$)|(text|bg|border)-accent([^-a-z]|$)|of-(card|input)\b' web/src`
   is empty. (`text-muted` and `*-accent` are valid shared classes with another meaning — `muted` and
   `accent` are fills there — so they are searched for explicitly; every use is remapped.)
 - `Alert`, `Button`, `Card`, `Field` and `Logo` no longer exist under `web/src/lib/components/`;
@@ -107,7 +107,8 @@ or client-specific behaviour changes.
 - `web/package.json`: `"@savvagent/console-ui": "0.2.0"` (exact) in `devDependencies`, beside every
   other dependency — the console is a static bundle, nothing is installed at runtime. Its peer
   `tailwindcss@^4.3.4` moves `tailwindcss` and `@tailwindcss/vite` to `^4.3.4`.
-  `overrides: { "@sveltejs/kit": "$@sveltejs/kit" }`: `runed` (under bits-ui) declares an
+  `overrides: { "runed": { "@sveltejs/kit": "$@sveltejs/kit" } }` (scoped to runed, so no other
+  dependency's real peer requirement is hidden): `runed` (under bits-ui) declares an
   *optional* peer `@sveltejs/kit@^2`. npm 11 leaves it out of the lockfile; npm 10 (Node 22, which
   CI and the Dockerfile use) refuses `npm ci` without it, or nests a second Kit 2 under bits-ui. The
   override makes every Kit reference the project's own Kit 3, one copy, and a lockfile both npm 10
@@ -119,11 +120,18 @@ or client-specific behaviour changes.
   ```
   The file holds a reference, never a token. Locally `export NODE_AUTH_TOKEN=$(gh auth token)`.
 - CI `web` job: `permissions: { contents: read, packages: read }`, and
-  `NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` on the `npm ci` step only.
+  `NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` on `npm ci --ignore-scripts` only; install scripts
+  run afterwards in `npm rebuild`, without it. Checkout runs with `persist-credentials: false`, so
+  the token is not left in `.git/config` for later steps. The repo is public and the package
+  private, and a fork's pull request is still issued a read-only token with `packages: read`, so
+  `web` and `docker-build` skip pull requests from forks
+  (`github.event.pull_request.head.repo.full_name == github.repository`). Actions handed the token
+  are pinned by commit SHA.
 - CI `docker-build` job: `permissions: { contents: read, packages: read }`; `docker/build-push-action`
   gets `secrets: NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}`.
 - `Dockerfile` console stage: `.npmrc` is copied with the manifests, and
-  `RUN --mount=type=secret,id=NODE_AUTH_TOKEN,required=true NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)" npm ci`.
+  `RUN --mount=type=secret,id=NODE_AUTH_TOKEN,required=true NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)" npm ci --ignore-scripts`,
+  then `RUN npm rebuild` without the secret.
   The secret is a tmpfs mount for that one `RUN`; it is never an `ARG` or `ENV` and is in no layer.
   `required=true` makes a build without it fail at that line, naming the secret, rather than at a
   401 deep in npm's output.
@@ -139,7 +147,13 @@ layer already styles `body`, so the classes are dropped).
 
 `app.css` becomes `@import 'tailwindcss'; @import '@savvagent/console-ui/theme.css';` plus the
 `.of-mono` component class (font only) and the visible-focus rule, rewritten onto `--ring`. Tower's
-own `@theme` palette and `.of-card`/`.of-input`/`.of-label` go.
+own `@theme` palette and `.of-card`/`.of-input` go. Three classes are kept, each written once from
+the shared tokens so a restyle of the package is matched in one place rather than pasted into every
+page: `.of-surface` (the shared Card's surface, for a list item or table wrapper that cannot be a
+`<Card>`), `.of-label` (the small-caps label) and `.of-select` (a native `<select>` drawn like the
+shared Input; the shared Select is a custom listbox and the queue filters keep the native control).
+Card titles stay headings: `<CardTitle><h2>…</h2></CardTitle>`, since the shared `CardTitle` is a
+`<div>`.
 
 Token mapping applied to every page:
 
@@ -278,5 +292,10 @@ GitHub Packages by Actions are covered by the existing grant and the org's plan.
   the token sweep and the screenshot check are the guard.
 - **Package availability.** Every build now depends on GitHub Packages and on the repo's Actions
   read grant (in place). A local build without `NODE_AUTH_TOKEN` fails at install.
+- **Two owners of `.dark`, later.** Tower sets the class from the OS. If the shared header grows a
+  theme control, tower's `followColorScheme` has to give way to it.
+- **The deploy token leaves GitHub.** `--build-secret` hands the job token (contents and packages,
+  read-only, valid for the job) to Fly's remote builder, and it sits in flyctl's argv on the runner.
+  Accepted; building on the runner and deploying the image would avoid it.
 - **Release-gated deploy.** Merging this PR deploys nothing; the change reaches production when the
   next release-please PR merges.

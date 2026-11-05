@@ -71,7 +71,7 @@
   {:else if events.length === 0}
     <Empty title={m.audit_empty()} />
   {:else}
-    <div class="overflow-x-auto rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10">
+    <div class="of-surface overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="border-b border-border text-left text-xs text-muted-foreground">
           <tr>

@@ -1,7 +1,8 @@
 import { discoverPlatformUrl } from './platform';
 
 /**
- * Where the header's "Back to Savvagent" link goes, and when to go looking for it.
+ * Where the links back to the platform go (the shared header and footer), and when to go
+ * looking for it.
  *
  * A signed-in session already says where the platform is. A visitor without a
  * usable address — signed out, a failed session lookup, or an address

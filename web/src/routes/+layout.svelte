@@ -103,6 +103,8 @@
   });
 
   async function signOut() {
+    // Both the shared account menu and the fallback header call this; one sign-out at a time.
+    if (signingOut) return;
     signingOut = true;
     try {
       await api.logout();
@@ -168,10 +170,10 @@
    * The version is a link only because the shared footer renders links; the API
    * reference is the closest thing to release notes a customer can open.
    */
-  const footerLinks = $derived([
+  const footerLinks = [
     { label: m.nav_api_reference(), href: '/docs/api' },
     { label: `v${APP_VERSION}`, href: '/docs/api' }
-  ]);
+  ];
 </script>
 
 <!--
@@ -233,7 +235,7 @@
     <header
       class="flex items-center gap-2 border-b bg-background px-2 py-2 text-foreground sm:px-4"
     >
-      <span class="px-2 text-sm font-semibold">Savvagent Tower</span>
+      <a href="/" class="px-2 text-sm font-semibold">Savvagent Tower</a>
       <div class="flex-1"></div>
       {#if session.info}
         <button

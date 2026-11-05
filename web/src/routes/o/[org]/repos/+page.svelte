@@ -265,7 +265,7 @@
   {#if showForm}
     <Card>
       <CardHeader class="border-b">
-        <CardTitle>{m.repos_form_title()}</CardTitle>
+        <CardTitle><h2>{m.repos_form_title()}</h2></CardTitle>
       </CardHeader>
       <CardContent>
         <form onsubmit={register}>
@@ -309,7 +309,7 @@
             {#if formError}<Alert variant="destructive">{formError}</Alert>{/if}
 
             <div>
-              <Button type="submit" disabled={creating}>
+              <Button type="submit" disabled={creating} aria-busy={creating}>
                 {#if creating}<Spinner />{/if}
                 {m.repos_submit()}
               </Button>
@@ -340,7 +340,7 @@
   {:else}
     <ul class="space-y-2">
       {#each repos as repo (repo.id)}
-        <li class="rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10">
+        <li class="of-surface">
           <div class="flex flex-wrap items-center gap-3 px-4 py-3">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
@@ -488,6 +488,7 @@
                           </label>
                           <Button
                             disabled={bindingBusy === key}
+                            aria-busy={bindingBusy === key}
                             onclick={() => saveBinding(repo.slug, provider)}
                           >
                             {#if bindingBusy === key}<Spinner />{/if}
@@ -497,6 +498,7 @@
                             <Button
                               variant="outline"
                               disabled={bindingBusy === key}
+                              aria-busy={bindingBusy === key}
                               onclick={() => removeBinding(repo.slug, provider)}
                             >
                               {#if bindingBusy === key}<Spinner />{/if}
@@ -529,7 +531,9 @@
                         </p>
                       {/if}
                       {#if bindingError[key]}
-                        <p class="mt-1 text-xs text-rose-400">{bindingError[key]}</p>
+                        <p role="alert" class="mt-1 text-xs text-destructive">
+                          {bindingError[key]}
+                        </p>
                       {/if}
                     </li>
                   {/each}

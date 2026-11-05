@@ -7,7 +7,8 @@ tracker connections, and the audit log. Sign-in, members, teams, SSO, usage, and
 the Savvagent platform's; the console signs in through it and links to it.
 
 ```bash
-export NODE_AUTH_TOKEN=$(gh auth token)   # read:packages, for @savvagent/console-ui (see below)
+gh auth refresh -h github.com -s read:packages   # once: gh's default login lacks it
+export NODE_AUTH_TOKEN=$(gh auth token)   # for @savvagent/console-ui (see below)
 npm install
 npm run dev      # Vite on :5173, proxying /api /auth /oauth /.well-known to OF_API_ORIGIN
 npm run check    # compile messages, check completeness, then svelte-check + tsc
@@ -172,7 +173,10 @@ triggered it, and it sets `<html lang>` from script at boot (`app.html` ships `l
 
 `@savvagent/console-ui` is pinned to an exact version and installed from GitHub Packages, which
 needs a token with `read:packages` as `NODE_AUTH_TOKEN` wherever the dependencies are installed
-(`.npmrc` names it by reference only): `export NODE_AUTH_TOKEN=$(gh auth token)` locally; CI's
+(`.npmrc` names it by reference only). Locally, `gh auth refresh -h github.com -s read:packages`
+once, then `export NODE_AUTH_TOKEN=$(gh auth token)`; that token can do everything your login can,
+so for a build that leaves this machine (`fly deploy`) use a classic token with only
+`read:packages` instead. CI's
 `web` and `docker-build` jobs use the job token; the image's console stage reads it from a BuildKit
 secret (`podman build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN .`, `fly deploy
 --build-secret NODE_AUTH_TOKEN=…`), never a build argument.

@@ -42,6 +42,8 @@
     "wrangler": "^4.128.0"
   },
   "overrides": {
-    "@sveltejs/kit": "$@sveltejs/kit"
+    "runed": {
+      "@sveltejs/kit": "$@sveltejs/kit"
+    }
   }
 }

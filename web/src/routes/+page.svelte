@@ -85,7 +85,7 @@
         {m.landing_value_heading()}
       </h2>
       <div class="mt-8 grid gap-4 sm:grid-cols-3">
-        <div class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+        <div class="of-surface p-5">
           <h3 class="text-sm font-semibold text-primary">{m.landing_dev_heading()}</h3>
           <ul class="mt-3 space-y-3 text-sm text-muted-foreground">
             {#each devPoints as point (point)}
@@ -98,7 +98,7 @@
           </ul>
         </div>
 
-        <div class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+        <div class="of-surface p-5">
           <h3 class="text-sm font-semibold text-primary">{m.landing_team_heading()}</h3>
           <ul class="mt-3 space-y-3 text-sm text-muted-foreground">
             {#each teamPoints as point (point)}
@@ -111,7 +111,7 @@
           </ul>
         </div>
 
-        <div class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+        <div class="of-surface p-5">
           <h3 class="text-sm font-semibold text-primary">{m.landing_leadership_heading()}</h3>
           <ul class="mt-3 space-y-3 text-sm text-muted-foreground">
             {#each leadershipPoints as point (point)}
@@ -129,7 +129,7 @@
     <section id="how-it-works" class="scroll-mt-20">
       <h2 class="text-center text-2xl font-semibold text-foreground">{m.landing_how_heading()}</h2>
       <ol class="mt-8 grid gap-6 sm:grid-cols-3">
-        <li class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+        <li class="of-surface p-5">
           <div
             class="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary"
           >
@@ -138,7 +138,7 @@
           <h3 class="mt-3 text-sm font-semibold text-foreground">{m.landing_how_1_title()}</h3>
           <p class="mt-1.5 text-sm text-muted-foreground">{m.landing_how_1_body()}</p>
         </li>
-        <li class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+        <li class="of-surface p-5">
           <div
             class="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary"
           >
@@ -152,7 +152,7 @@
             >claude mcp add --transport http savvagent-tower https://mcp.your-domain.com/mcp</code
           >
         </li>
-        <li class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+        <li class="of-surface p-5">
           <div
             class="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary"
           >
@@ -164,9 +164,7 @@
       </ol>
     </section>
 
-    <section
-      class="mx-auto max-w-3xl rounded-xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10"
-    >
+    <section class="of-surface mx-auto max-w-3xl p-6">
       <h2 class="text-lg font-semibold text-foreground">{m.landing_honest_heading()}</h2>
       <p class="mt-1 text-sm text-muted-foreground">{m.landing_honest_intro()}</p>
       <ul class="mt-4 space-y-2.5 text-sm text-muted-foreground">

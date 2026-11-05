@@ -126,7 +126,7 @@
         {@const connection = connectionFor(provider)}
         <Card>
           <CardHeader class="border-b">
-            <CardTitle>{name}</CardTitle>
+            <CardTitle><h2>{name}</h2></CardTitle>
           </CardHeader>
           <CardContent>
             {#if connection}
@@ -147,6 +147,7 @@
                 <Button
                   variant="outline"
                   disabled={busy === provider}
+                  aria-busy={busy === provider}
                   onclick={() => disconnect(provider)}
                 >
                   {#if busy === provider}<Spinner />{/if}

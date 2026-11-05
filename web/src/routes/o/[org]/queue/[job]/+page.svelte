@@ -111,7 +111,7 @@
     {#if job.description}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle>{m.job_description_title()}</CardTitle>
+          <CardTitle><h2>{m.job_description_title()}</h2></CardTitle>
         </CardHeader>
         <CardContent>
           <p class="text-sm whitespace-pre-wrap text-muted-foreground">{job.description}</p>
@@ -126,7 +126,7 @@
     {#if job.status === 'completed' && job.result}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle>{m.job_result_title()}</CardTitle>
+          <CardTitle><h2>{m.job_result_title()}</h2></CardTitle>
         </CardHeader>
         <CardContent>
           <p class="text-sm whitespace-pre-wrap text-muted-foreground">{job.result}</p>
@@ -136,14 +136,12 @@
 
     <Card>
       <CardHeader class="border-b">
-        <CardTitle>{m.job_details_title()}</CardTitle>
+        <CardTitle><h2>{m.job_details_title()}</h2></CardTitle>
       </CardHeader>
       <CardContent>
         <dl class="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_repo()}
             </dt>
             <dd>
@@ -160,9 +158,7 @@
             </dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_ticket()}
             </dt>
             <dd class="text-muted-foreground">
@@ -170,25 +166,19 @@
             </dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_claimed_by()}
             </dt>
             <dd class="text-muted-foreground">{job.claimedByLabel ?? '—'}</dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_agent_type()}
             </dt>
             <dd class="text-muted-foreground">{job.agentType ?? m.job_agent_type_any()}</dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_queued()}
             </dt>
             <dd class="text-muted-foreground" title={absolute(job.createdAt)}>
@@ -196,9 +186,7 @@
             </dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_started()}
             </dt>
             <dd class="text-muted-foreground" title={absolute(job.startedAt)}>
@@ -206,9 +194,7 @@
             </dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_finished()}
             </dt>
             <dd class="text-muted-foreground" title={absolute(job.completedAt)}>
@@ -216,18 +202,14 @@
             </dd>
           </div>
           <div>
-            <dt
-              class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-            >
+            <dt class="of-label">
               {m.job_field_attempts()}
             </dt>
             <dd class="text-muted-foreground">{job.attempts}</dd>
           </div>
           {#if job.cancelReason}
             <div>
-              <dt
-                class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-              >
+              <dt class="of-label">
                 {m.job_cancellation_requested()}
               </dt>
               <dd class="text-muted-foreground">{job.cancelReason}</dd>
@@ -240,7 +222,7 @@
     {#if job.dependsOn.length > 0}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle>{m.job_waiting_on_title()}</CardTitle>
+          <CardTitle><h2>{m.job_waiting_on_title()}</h2></CardTitle>
           <CardDescription>{m.job_waiting_on_description()}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -261,7 +243,7 @@
     {#if metadata}
       <Card>
         <CardHeader class="border-b">
-          <CardTitle>{m.job_metadata_title()}</CardTitle>
+          <CardTitle><h2>{m.job_metadata_title()}</h2></CardTitle>
           <CardDescription>{m.job_metadata_description()}</CardDescription>
         </CardHeader>
         <CardContent>

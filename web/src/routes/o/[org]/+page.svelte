@@ -167,7 +167,7 @@
   {:else}
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {#each tiles as tile (tile.label)}
-        <div class="rounded-xl bg-card px-4 py-3 text-card-foreground ring-1 ring-foreground/10">
+        <div class="of-surface px-4 py-3">
           <div class="text-2xl font-semibold {tile.tone}">
             {tile.value.toLocaleString(currentLocale())}
           </div>
@@ -186,7 +186,7 @@
     <div class="grid gap-6 lg:grid-cols-2">
       <Card>
         <CardHeader class="border-b">
-          <CardTitle>{m.overview_recent_title()}</CardTitle>
+          <CardTitle><h2>{m.overview_recent_title()}</h2></CardTitle>
           <CardDescription>{m.overview_recent_description()}</CardDescription>
           <CardAction>
             <a
@@ -232,7 +232,7 @@
       <div class="space-y-6">
         <Card>
           <CardHeader class="border-b">
-            <CardTitle>{m.overview_repos_title()}</CardTitle>
+            <CardTitle><h2>{m.overview_repos_title()}</h2></CardTitle>
             <CardDescription>{m.overview_repos_description()}</CardDescription>
             <CardAction>
               <a

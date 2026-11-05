@@ -141,15 +141,11 @@
     <p class="text-xs text-muted-foreground">{m.queue_read_only_note()}</p>
   </div>
 
-  <div
-    class="flex flex-wrap items-end gap-3 rounded-xl bg-card px-4 py-3 text-card-foreground ring-1 ring-foreground/10"
-  >
+  <div class="of-surface flex flex-wrap items-end gap-3 px-4 py-3">
     <label class="block">
-      <span class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-        >{m.queue_filter_status()}</span
-      >
+      <span class="of-label">{m.queue_filter_status()}</span>
       <select
-        class="h-8 min-w-40 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+        class="of-select min-w-40"
         value={status ?? ''}
         onchange={(e) => setFilter('status', e.currentTarget.value)}
       >
@@ -163,11 +159,9 @@
     </label>
 
     <label class="block">
-      <span class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-        >{m.queue_filter_repo()}</span
-      >
+      <span class="of-label">{m.queue_filter_repo()}</span>
       <select
-        class="h-8 min-w-44 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
+        class="of-select min-w-44"
         value={repo ?? ''}
         onchange={(e) => setFilter('repo', e.currentTarget.value)}
       >
@@ -193,9 +187,7 @@
     -->
     {#if team}
       <div class="pb-2 text-sm text-muted-foreground">
-        <span class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-          >{m.queue_filter_team()}</span
-        >
+        <span class="of-label">{m.queue_filter_team()}</span>
         <code class="of-mono ml-1">{team}</code>
       </div>
     {/if}
@@ -256,7 +248,7 @@
       {/if}
     </Empty>
   {:else}
-    <div class="overflow-x-auto rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10">
+    <div class="of-surface overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="border-b border-border text-left text-xs text-muted-foreground">
           <tr>

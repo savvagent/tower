@@ -22,6 +22,28 @@
 }
 
 @layer components {
+  /*
+    The shared Card's surface, for an element that cannot be a `<Card>` (a list item, a table's
+    scroll wrapper, a filter bar). Written from the shared tokens, and kept here once so a restyle
+    of the shared Card is matched in one place rather than in every page.
+  */
+  .of-surface {
+    @apply rounded-xl bg-card text-card-foreground ring-1 ring-foreground/10;
+  }
+
+  /* A small caps label above a value or a control. */
+  .of-label {
+    @apply mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase;
+  }
+
+  /*
+    A native <select> drawn like the shared Input. The shared Select is a custom listbox; a native
+    one keeps the queue filters keyboard- and screen-reader-operable with no script.
+  */
+  .of-select {
+    @apply h-8 rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30;
+  }
+
   /* Tokens, provisioning keys, job ids — anything that is copied, not read. */
   .of-mono {
     @apply font-mono text-sm break-all;

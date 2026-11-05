@@ -16,8 +16,11 @@ COPY web/package.json web/package-lock.json web/.npmrc ./
 # would print. `required=true` fails the build here, naming the secret, instead
 # of as a 401 somewhere in npm's output. Pass it with
 # `--secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN` (or Fly's `--build-secret`).
+# `--ignore-scripts` keeps every package's install script from running while
+# the token is present; they run in the next step, without it.
 RUN --mount=type=secret,id=NODE_AUTH_TOKEN,required=true \
-    NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)" npm ci
+    NODE_AUTH_TOKEN="$(cat /run/secrets/NODE_AUTH_TOKEN)" npm ci --ignore-scripts
+RUN npm rebuild
 
 COPY web/ ./
 RUN npm run build

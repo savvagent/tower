@@ -31,10 +31,7 @@
 </script>
 
 <div>
-  {#if label}<span
-      class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
-      >{label}</span
-    >{/if}
+  {#if label}<span class="of-label">{label}</span>{/if}
   <div class="flex items-start gap-2">
     <code
       class="of-mono flex-1 rounded-lg border border-input bg-muted/40 px-3 py-2 text-foreground"

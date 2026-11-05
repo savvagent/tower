@@ -768,10 +768,11 @@ check anywhere upstream skips the whole chain rather than attempting a deploy ag
 For an out-of-band deploy — re-deploying without a new commit, or deploying a specific
 historical SHA — run it by hand. The image's console stage installs `@savvagent/console-ui` from
 GitHub Packages, so the build needs a token with `read:packages`, passed as a build secret (it
-reaches only the Dockerfile's secret mount, never a layer):
+reaches only the Dockerfile's secret mount, never a layer). The secret goes to Fly's remote builder,
+so use a classic personal access token with **only** `read:packages`, not your `gh` login token:
 
 ```bash
-fly deploy -a otto-factory-mcp --build-secret NODE_AUTH_TOKEN="$(gh auth token)"
+fly deploy -a otto-factory-mcp --build-secret NODE_AUTH_TOKEN="$READ_PACKAGES_TOKEN"
 ```
 
 which will build the Dockerfile, run migrations on startup, and pass the `/readyz`
