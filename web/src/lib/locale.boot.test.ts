@@ -7,9 +7,10 @@
  * a translated shell.
  */
 
-import { SUPPORTED } from '@savvagent/console-ui';
+import { SUPPORTED, currentLocale } from '@savvagent/console-ui';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { m } from '#lib/paraglide/messages.js';
 import { baseLocale, getLocale, locales } from '#lib/paraglide/runtime.js';
 import { LEGACY_CACHE_KEY, bootLocale } from './locale';
 
@@ -31,7 +32,10 @@ describe('bootLocale', () => {
   it('honours a choice cached under the old key, and moves it', () => {
     localStorage.setItem(LEGACY_CACHE_KEY, 'es');
     expect(bootLocale()).toBe('es');
+    // The shell and this console agree, and this console's own strings follow.
+    expect(currentLocale()).toBe('es');
     expect(getLocale()).toBe('es');
+    expect(m.nav_sign_in()).toBe('Iniciar sesión');
     expect(localStorage.getItem(LEGACY_CACHE_KEY)).toBeNull();
     expect(document.documentElement.lang).toBe('es');
   });
