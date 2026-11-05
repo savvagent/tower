@@ -9,7 +9,7 @@ it exactly.
 
 ## Status — 2026-11-05
 
-⬜ Tasks 1–5 not started.
+🚧 Task 1 in progress (`.npmrc`, package, lockfile, Dockerfile and CI edits made; docs pending).
 
 ## Global constraints
 
@@ -23,6 +23,13 @@ it exactly.
   where stated). Before the PR: those four, `podman build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN .`,
   and `cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings && cargo test --workspace`.
 - `export NODE_AUTH_TOKEN=$(gh auth token)` before any install.
+- **Evidence:** report each gate as the exact command with its pass/fail/skip counts; a skipped
+  test is not evidence. `cargo test --workspace` needs `podman compose up -d` (Postgres on 15433)
+  and a `.env` (copied from the main checkout) or its database tests prove nothing.
+- **Invariants:** static SPA (`adapter-static`, `ssr = false`, the `__Host-` cookie stays in the
+  browser); nothing about the deployment in the bundle (after a build, `grep -r savvagent.com
+  web/build` is empty); runes only; six catalog entries per string; a `404` still reads "no such
+  organization"; polling only through `Poller`.
 
 ## File structure
 
@@ -70,7 +77,11 @@ shell, then the pages, then docs. Each task leaves every gate green.
       `deploy` gets `packages: read` and `--build-secret NODE_AUTH_TOKEN="$NODE_AUTH_TOKEN"` with the
       token in the step `env`.
 - [ ] Docs: manual `fly deploy` and `npm install`/`npm run deploy` name the token.
-- [ ] Gates (check, lint, test). Commit `build(web): install @savvagent/console-ui from GitHub Packages`.
+- [ ] `package.json` `overrides: {"@sveltejs/kit": "$@sveltejs/kit"}` (spec §1); `npx npm@10 ci` and
+      `npm ci` both succeed; the lockfile has exactly one `@sveltejs/kit`.
+- [ ] Out-of-band reminder: the PR's own CI run must show `web` and `docker-build` green (they are
+      the first use of the token in CI); the `deploy` job is checked after the release merges (Task 5).
+- [ ] Gates (check, lint, test, build). Commit `build(web): install @savvagent/console-ui from GitHub Packages`.
 
 ## Task 2 — Locale, colour scheme, session mapping ⬜
 
@@ -84,28 +95,36 @@ shell, then the pages, then docs. Each task leaves every gate green.
       `otto.locale` and removes it; never overwrites an existing `otto.locale`; drops an unsupported
       value; a throwing store is ignored), `platform.test.ts` gains `shellPlatformUrl` (https and
       loopback http pass; http off loopback, credentials, `javascript:`, garbage, `undefined` refused).
-- [ ] `npx vitest run src/lib/theme.test.ts src/lib/console-session.test.ts src/lib/locale.test.ts`
+- [ ] `npx vitest run src/lib/theme.test.ts src/lib/console-session.test.ts src/lib/locale.test.ts src/lib/platform.test.ts`
       — expect failures.
-- [ ] Implement; `format.ts` and `o/[org]/+page.svelte` import `currentLocale` from the package.
+- [ ] Implement; `format.ts` and `o/[org]/+page.svelte` import `currentLocale` from the package, and
+      `+layout.svelte` calls `bootLocale()` (from `#lib/locale.ts`) in place of the old `resolveAtBoot()`.
       Re-run — expect pass. Gates. Commit `feat(web): boot the locale and colour scheme the shared way`.
 
 ## Task 3 — Shell: theme, header, footer ⬜
 
-- [ ] Extend `page.render.test.ts` (root) to expect the shared header: a "Savvagent" link whose href
-      is the session's `platformUrl`, and the API reference link in the footer. Run — expect failure.
+- [ ] Create `web/src/routes/LayoutHarness.svelte` (the root layout with a `children` snippet) and
+      `web/src/routes/layout.render.test.ts`. Set `session.info`/`session.ready` first so the
+      layout makes no `/api/session` request, and stub `fetch` for the header's service list
+      (`/services/v1.json` at the platform). Cases: signed in → a "Savvagent" link whose href is the
+      session's `platformUrl` and the footer's API reference link; no address known → the plain
+      fallback header with "Sign in". Run — expect failure.
 - [ ] `app.css` → shared theme (§2); `app.html` → `color-scheme` meta, body palette classes dropped.
 - [ ] `+layout.svelte` → `ConsoleHeader`/`ConsoleFooter` per spec §3–§4, with the plain fallback
       header/footer when no platform address is known; delete `Logo.svelte`.
 - [ ] Remove `nav_back_to_platform`, `nav_sign_out`, `nav_organizations`, `nav_platform_account`,
       `nav_platform_switch_org` (and any other key left unused) from all six catalogs (`npm run check` proves completeness).
-- [ ] Re-run the render test — pass. Gates. Commit `feat(web): render the console in the shared shell`.
+- [ ] Note: pages still use the old palette classes until Task 4, so they render unstyled in
+      between; do not screenshot here.
+- [ ] Re-run the render test — pass. Gates + build; `grep -r savvagent.com web/build` empty.
+      Commit `feat(web): render the console in the shared shell`.
 
 ## Task 4 — Components and pages onto the shared kit ⬜
 
 - [ ] Add `Spinner.svelte`; restyle `CopyField`, `Empty`, `Loading`, `StatusPill` onto shared tokens.
 - [ ] Replace `Alert`/`Button`/`Card`/`Field` in every page and the org layout with the shared
       components (spec §5) and map every palette class (spec §2 table); delete the four files.
-- [ ] `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|of-(card|input|label)' web/src` is empty.
+- [ ] `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted\b|(text|bg|border)-accent\b|of-(card|input|label)' web/src` is empty.
 - [ ] Render tests pass (update selectors only where markup legitimately changed). Gates + build.
       Commit `refactor(web): use the shared shadcn-svelte components and tokens`.
 
@@ -115,4 +134,8 @@ shell, then the pages, then docs. Each task leaves every gate green.
       package's; the locale paragraph no longer claims `users.locale`.
 - [ ] Screenshot check (outside the repo): mock API + platform, baseline vs branch, every page,
       light and dark, 1280 and 390 px. Fix anything missing, clipped or unreadable.
-- [ ] Full gate run (web four + Rust three + podman build). Commit `docs: describe the shared console shell`.
+- [ ] Full gate run (web four + Rust three + podman build with and without the secret, `--no-cache`).
+      Commit `docs(web): describe the shared console shell`.
+- [ ] After the PR opens: its CI run shows `rust`, `web`, `docker-build`, `pr-title` green on the head.
+- [ ] After the release-please PR merges: the `deploy` job's log shows the console stage's `npm ci`
+      succeeding with the build secret, and `https://tower.savvagent.com/readyz` answers 200.

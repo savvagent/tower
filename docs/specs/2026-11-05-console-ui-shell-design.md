@@ -79,7 +79,9 @@ keeps no copy of the shell or its primitives.
 - `web/src/routes/+layout.svelte` renders `ConsoleHeader` and `ConsoleFooter`; no other header or
   footer markup exists in `web/src`.
 - `web/src/app.css` imports `@savvagent/console-ui/theme.css` and declares no palette of its own;
-  `git grep -E '(text|bg|border)-(ink|faint|canvas|surface|raised|edge)\b' web/src` is empty.
+  `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted\b|(text|bg|border)-accent\b|of-(card|input|label)' web/src`
+  is empty. (`text-muted` and `*-accent` are valid shared classes with another meaning — `muted` and
+  `accent` are fills there — so they are searched for explicitly; every use is remapped.)
 - `Alert`, `Button`, `Card`, `Field` and `Logo` no longer exist under `web/src/lib/components/`;
   pages import `@savvagent/console-ui/ui/*` instead.
 - Every link to the platform derives from `platformUrl` (session, or discovery when signed out).
@@ -105,6 +107,11 @@ or client-specific behaviour changes.
 - `web/package.json`: `"@savvagent/console-ui": "0.2.0"` (exact) in `devDependencies`, beside every
   other dependency — the console is a static bundle, nothing is installed at runtime. Its peer
   `tailwindcss@^4.3.4` moves `tailwindcss` and `@tailwindcss/vite` to `^4.3.4`.
+  `overrides: { "@sveltejs/kit": "$@sveltejs/kit" }`: `runed` (under bits-ui) declares an
+  *optional* peer `@sveltejs/kit@^2`. npm 11 leaves it out of the lockfile; npm 10 (Node 22, which
+  CI and the Dockerfile use) refuses `npm ci` without it, or nests a second Kit 2 under bits-ui. The
+  override makes every Kit reference the project's own Kit 3, one copy, and a lockfile both npm 10
+  and 11 accept. runed's Kit integration is not used by the shared components.
 - `web/.npmrc`:
   ```ini
   @savvagent:registry=https://npm.pkg.github.com
