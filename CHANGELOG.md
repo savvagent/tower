@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/savvagent/tower/compare/v0.19.0...v0.20.0) (2026-11-05)
+
+
+### Features
+
+* **web:** move the console onto the shared @savvagent/console-ui shell ([#296](https://github.com/savvagent/tower/issues/296)) ([e1cce26](https://github.com/savvagent/tower/commit/e1cce267d5d4199fc03eeb0025f0f9d32f256ae0)), closes [#293](https://github.com/savvagent/tower/issues/293)
+
 ## [0.19.0](https://github.com/savvagent/otto-tower/compare/v0.18.0...v0.19.0) (2026-10-31)
 
 
