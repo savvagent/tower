@@ -34,7 +34,7 @@
   {#if label}<span class="of-label">{label}</span>{/if}
   <div class="flex items-start gap-2">
     <code
-      class="of-mono flex-1 rounded-md border border-edge bg-canvas px-3 py-2 text-ink"
+      class="of-mono border-edge bg-canvas text-ink flex-1 rounded-md border px-3 py-2"
       class:whitespace-pre-wrap={multiline}>{value}</code
     >
     <Button tone="quiet" onclick={onCopy}>
@@ -46,6 +46,6 @@
     </Button>
   </div>
   {#if state === 'failed'}
-    <p class="mt-1 text-xs text-warn">{m.copy_clipboard_refused()}</p>
+    <p class="text-warn mt-1 text-xs">{m.copy_clipboard_refused()}</p>
   {/if}
 </div>

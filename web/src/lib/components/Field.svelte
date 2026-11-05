@@ -18,5 +18,5 @@
 <label class="block">
   <span class="of-label">{label}</span>
   {@render children()}
-  {#if hint}<span class="mt-1 block text-xs text-faint">{hint}</span>{/if}
+  {#if hint}<span class="text-faint mt-1 block text-xs">{hint}</span>{/if}
 </label>

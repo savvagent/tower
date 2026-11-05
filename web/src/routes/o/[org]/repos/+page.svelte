@@ -246,7 +246,7 @@
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="text-lg font-semibold">{m.repos_title()}</h1>
-      <p class="mt-0.5 text-sm text-faint">
+      <p class="text-faint mt-0.5 text-sm">
         {m.repos_subtitle()}
       </p>
     </div>
@@ -304,27 +304,27 @@
           <div class="flex flex-wrap items-center gap-3 px-4 py-3">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <span class="of-mono text-sm text-ink">{repo.slug}</span>
+                <span class="of-mono text-ink text-sm">{repo.slug}</span>
                 {#if !repo.active}
-                  <span class="rounded-full border border-edge px-2 py-0.5 text-xs text-faint">
+                  <span class="border-edge text-faint rounded-full border px-2 py-0.5 text-xs">
                     {m.repos_badge_retired()}
                   </span>
                 {/if}
                 {#if repo.hasActiveLease}
                   <span
-                    class="rounded-full border border-busy/50 bg-busy/10 px-2 py-0.5 text-xs text-busy"
+                    class="border-busy/50 bg-busy/10 text-busy rounded-full border px-2 py-0.5 text-xs"
                   >
                     {m.repos_badge_in_use()}
                   </span>
                 {/if}
               </div>
-              <p class="mt-0.5 text-xs text-faint">
+              <p class="text-faint mt-0.5 text-xs">
                 {repo.name} · {repo.provider} · {repo.defaultBranch} · {teamName(repo.teamId)}
               </p>
             </div>
 
             <button
-              class="text-xs text-muted underline hover:text-ink"
+              class="hover:text-ink text-xs text-muted underline"
               onclick={() => toggle(repo)}
               aria-expanded={expanded === repo.slug}
             >
@@ -332,7 +332,7 @@
             </button>
 
             <a
-              class="text-xs text-muted underline hover:text-ink"
+              class="hover:text-ink text-xs text-muted underline"
               href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
             >
               {m.repos_queue_link()}
@@ -346,7 +346,7 @@
           </div>
 
           {#if expanded === repo.slug}
-            <div class="border-t border-edge/60 px-4 py-3">
+            <div class="border-edge/60 border-t px-4 py-3">
               <div class="flex items-center gap-1.5">
                 <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">
                   {m.repos_leases_heading()}
@@ -354,7 +354,7 @@
                 <div class="relative">
                   <button
                     type="button"
-                    class="flex h-4 w-4 items-center justify-center rounded-full border border-edge text-[10px] text-faint hover:text-ink"
+                    class="border-edge text-faint hover:text-ink flex h-4 w-4 items-center justify-center rounded-full border text-[10px]"
                     aria-label={m.repos_leases_info_label()}
                     aria-expanded={infoOpen}
                     aria-controls={`repos-lease-info-${repo.slug}`}
@@ -369,19 +369,19 @@
                   <div
                     id={`repos-lease-info-${repo.slug}`}
                     hidden={!infoOpen}
-                    class="absolute z-10 mt-1 w-64 rounded-md border border-edge bg-raised p-2 text-xs text-faint shadow-lg"
+                    class="border-edge bg-raised text-faint absolute z-10 mt-1 w-64 rounded-md border p-2 text-xs shadow-lg"
                   >
                     {m.repos_leases_info_detail()}
                   </div>
                 </div>
               </div>
-              <p class="mt-1 text-xs text-faint">{m.repos_leases_note()}</p>
+              <p class="text-faint mt-1 text-xs">{m.repos_leases_note()}</p>
               {#if leases[repo.slug] === 'loading'}
                 <Loading what={m.repos_leases_loading()} />
               {:else if leases[repo.slug] === 'failed'}
                 <Alert>{m.repos_leases_failed()}</Alert>
               {:else if (leases[repo.slug] as Lease[]).length === 0}
-                <p class="text-xs text-faint">
+                <p class="text-faint text-xs">
                   {m.repos_no_leases({ repo: repo.slug })}
                 </p>
               {:else}
@@ -394,13 +394,13 @@
                       </span>
                       {#if lease.jobId}
                         <a
-                          class="of-mono text-xs text-muted underline hover:text-ink"
+                          class="of-mono hover:text-ink text-xs text-muted underline"
                           href="/o/{org.slug}/queue/{lease.jobId}"
                         >
                           {lease.jobId}
                         </a>
                       {/if}
-                      <span class="text-xs text-faint">
+                      <span class="text-faint text-xs">
                         {m.repos_lease_expires({ when: relative(lease.expiresAt) })}
                       </span>
                     </li>
@@ -409,7 +409,7 @@
               {/if}
             </div>
 
-            <div class="border-t border-edge/60 px-4 py-3">
+            <div class="border-edge/60 border-t px-4 py-3">
               <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">
                 {m.repos_trackers_heading()}
               </h3>
@@ -425,7 +425,7 @@
                     {@const key = `${repo.slug}:${provider}`}
                     <li>
                       <div class="flex flex-wrap items-end gap-2">
-                        <span class="w-14 shrink-0 text-sm text-ink">{name}</span>
+                        <span class="text-ink w-14 shrink-0 text-sm">{name}</span>
 
                         {#if org.isAdmin}
                           <label class="min-w-0 flex-1">
@@ -465,11 +465,11 @@
                           {/if}
                         {:else if binding}
                           <span class="of-mono text-sm text-muted">{binding.externalRef}</span>
-                          <span class="text-xs text-faint">
+                          <span class="text-faint text-xs">
                             {m.repos_binding_trigger_display({ label: binding.triggerLabel })}
                           </span>
                         {:else}
-                          <span class="text-xs text-faint">{m.repos_binding_unbound()}</span>
+                          <span class="text-faint text-xs">{m.repos_binding_unbound()}</span>
                         {/if}
                       </div>
 
@@ -477,9 +477,9 @@
                         {@const parts = around(
                           m.repos_binding_inactive({ provider: name, link: LINK })
                         )}
-                        <p class="mt-1 text-xs text-faint">
+                        <p class="text-faint mt-1 text-xs">
                           {parts[0]}<a
-                            class="underline hover:text-ink"
+                            class="hover:text-ink underline"
                             href="/o/{org.slug}/trackers">{m.repos_trackers_heading()}</a
                           >{parts[1]}
                         </p>
@@ -491,7 +491,7 @@
                   {/each}
                 </ul>
 
-                <p class="mt-3 text-xs text-faint">
+                <p class="text-faint mt-3 text-xs">
                   {m.repos_bindings_note({ githubRef: 'owner/repo' })}
                 </p>
               {/if}

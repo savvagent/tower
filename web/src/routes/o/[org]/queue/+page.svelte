@@ -138,7 +138,7 @@
 <div class="space-y-4">
   <div class="flex flex-wrap items-baseline justify-between gap-2">
     <h1 class="text-lg font-semibold">{m.queue_title()}</h1>
-    <p class="text-xs text-faint">{m.queue_read_only_note()}</p>
+    <p class="text-faint text-xs">{m.queue_read_only_note()}</p>
   </div>
 
   <div class="of-card flex flex-wrap items-end gap-3 px-4 py-3">
@@ -203,7 +203,7 @@
 
     {#if filtered}
       <button
-        class="ml-auto pb-2 text-xs text-muted underline hover:text-ink"
+        class="hover:text-ink ml-auto pb-2 text-xs text-muted underline"
         onclick={() => applyFilters(page.url.pathname)}
       >
         {m.queue_clear_filters()}
@@ -216,9 +216,9 @@
   {/if}
 
   {#if jobsPoll.parked}
-    <p role="status" class="text-xs text-faint">{m.queue_paused()}</p>
+    <p role="status" class="text-faint text-xs">{m.queue_paused()}</p>
   {:else if jobsPoll.stale}
-    <p role="status" class="text-xs text-warn">
+    <p role="status" class="text-warn text-xs">
       {m.queue_refresh_failed({
         reason: messageFor(jobsPoll.error, m.error_network()),
         age: relative(
@@ -239,7 +239,7 @@
     <Empty title={filtered ? m.queue_empty_filtered() : m.queue_empty_title()}>
       {#if !filtered}
         {m.queue_empty_hint()}
-        <a class="text-muted underline hover:text-ink" href="/o/{org.slug}/connect">
+        <a class="hover:text-ink text-muted underline" href="/o/{org.slug}/connect">
           {m.queue_connect_one()}
         </a>.
       {/if}
@@ -247,7 +247,7 @@
   {:else}
     <div class="of-card overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="border-b border-edge/60 text-left text-xs text-faint">
+        <thead class="border-edge/60 text-faint border-b text-left text-xs">
           <tr>
             <th class="px-4 py-2 font-medium">{m.queue_col_job()}</th>
             <th class="px-4 py-2 font-medium">{m.queue_col_status()}</th>
@@ -256,26 +256,26 @@
             <th class="px-4 py-2 font-medium">{m.queue_col_queued()}</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-edge/40">
+        <tbody class="divide-edge/40 divide-y">
           {#each jobs as job (job.id)}
             <tr class="hover:bg-raised/40">
               <td class="px-4 py-2">
                 <a class="text-ink hover:underline" href="/o/{org.slug}/queue/{job.id}">
                   {job.title}
                 </a>
-                <div class="of-mono text-xs text-faint">{job.id}</div>
+                <div class="of-mono text-faint text-xs">{job.id}</div>
               </td>
               <td class="px-4 py-2">
                 <StatusPill status={job.status} />
                 {#if isClaimStranded(job)}
-                  <div class="text-xs font-medium text-bad">{m.job_claim_stranded()}</div>
+                  <div class="text-bad text-xs font-medium">{m.job_claim_stranded()}</div>
                 {/if}
               </td>
               <td class="px-4 py-2 text-muted">
                 {job.claimedByLabel ?? job.agentType ?? '—'}
               </td>
               <td class="px-4 py-2 text-muted">{job.ticketRef ?? '—'}</td>
-              <td class="px-4 py-2 whitespace-nowrap text-faint">{relative(job.createdAt)}</td>
+              <td class="text-faint px-4 py-2 whitespace-nowrap">{relative(job.createdAt)}</td>
             </tr>
           {/each}
         </tbody>
@@ -287,7 +287,7 @@
       cap is a separate remark that only sometimes applies; welding them into a
       single string would need a variant per plural category *and* per branch.
     -->
-    <p class="text-xs text-faint">
+    <p class="text-faint text-xs">
       {m.queue_showing({ count: jobs.length })}
       {#if jobs.length === 200}{m.queue_showing_capped({ limit: 200 })}{/if}
     </p>

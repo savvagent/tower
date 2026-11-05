@@ -13,10 +13,10 @@
 
 <section class="of-card">
   {#if title || actions}
-    <header class="flex items-start justify-between gap-4 border-b border-edge/60 px-4 py-3">
+    <header class="border-edge/60 flex items-start justify-between gap-4 border-b px-4 py-3">
       <div>
-        {#if title}<h2 class="text-sm font-semibold text-ink">{title}</h2>{/if}
-        {#if description}<p class="mt-0.5 text-xs text-faint">{description}</p>{/if}
+        {#if title}<h2 class="text-ink text-sm font-semibold">{title}</h2>{/if}
+        {#if description}<p class="text-faint mt-0.5 text-xs">{description}</p>{/if}
       </div>
       {#if actions}<div class="flex shrink-0 gap-2">{@render actions()}</div>{/if}
     </header>

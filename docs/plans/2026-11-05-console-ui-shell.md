@@ -112,8 +112,8 @@ shell, then the pages, then docs. Each task leaves every gate green.
 - [ ] `app.css` → shared theme (§2); `app.html` → `color-scheme` meta, body palette classes dropped.
 - [ ] `+layout.svelte` → `ConsoleHeader`/`ConsoleFooter` per spec §3–§4, with the plain fallback
       header/footer when no platform address is known; delete `Logo.svelte`.
-- [ ] Remove `nav_back_to_platform`, `nav_sign_out`, `nav_organizations`, `nav_platform_account`,
-      `nav_platform_switch_org` (and any other key left unused) from all six catalogs (`npm run check` proves completeness).
+- [ ] Remove `nav_back_to_platform`, `nav_organizations`, `nav_platform_account`,
+      `nav_platform_switch_org` (and any other key left unused; `nav_sign_out` stays for the fallback header) from all six catalogs (`npm run check` proves completeness).
 - [ ] Note: pages still use the old palette classes until Task 4, so they render unstyled in
       between; do not screenshot here.
 - [ ] Re-run the render test — pass. Gates + build; `grep -r savvagent.com web/build` empty.

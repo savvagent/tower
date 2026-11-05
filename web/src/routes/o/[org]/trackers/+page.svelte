@@ -103,8 +103,8 @@
 <div class="space-y-5">
   <div>
     <h1 class="text-lg font-semibold">{m.trackers_title()}</h1>
-    <p class="mt-0.5 text-sm text-faint">
-      {subtitle[0]}<a class="underline hover:text-ink" href="/o/{org.slug}/repos"
+    <p class="text-faint mt-0.5 text-sm">
+      {subtitle[0]}<a class="hover:text-ink underline" href="/o/{org.slug}/repos"
         >{m.trackers_repos_link()}</a
       >{subtitle[1]}
     </p>
@@ -127,11 +127,11 @@
           {#if connection}
             <div class="flex flex-wrap items-center gap-3">
               <div class="min-w-0 flex-1">
-                <p class="text-sm text-ink">
+                <p class="text-ink text-sm">
                   {identifies}
                   <code class="of-mono">{connection.externalId}</code>
                 </p>
-                <p class="mt-0.5 text-xs text-faint">
+                <p class="text-faint mt-0.5 text-xs">
                   {connection.hasCredentials
                     ? m.trackers_connected_with_credentials({
                         when: relative(connection.createdAt)
@@ -143,7 +143,7 @@
                 {m.trackers_disconnect()}
               </Button>
             </div>
-            <p class="mt-3 text-xs text-faint">
+            <p class="text-faint mt-3 text-xs">
               {m.trackers_disconnect_note({ provider: name })}
             </p>
           {:else if setup.configured}

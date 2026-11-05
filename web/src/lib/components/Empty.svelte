@@ -15,9 +15,9 @@
   let { title, children }: Props = $props();
 </script>
 
-<div class="rounded-md border border-dashed border-edge/70 px-4 py-8 text-center">
+<div class="border-edge/70 rounded-md border border-dashed px-4 py-8 text-center">
   <p class="text-sm text-muted">{title}</p>
   {#if children}
-    <div class="mt-2 text-xs text-faint">{@render children()}</div>
+    <div class="text-faint mt-2 text-xs">{@render children()}</div>
   {/if}
 </div>

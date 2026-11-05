@@ -80,7 +80,7 @@
       `<code>`. The slug sits mid-sentence in English and does not in every
       language, and a sentence assembled from two fragments cannot be moved.
     -->
-    <p class="mt-2 text-sm text-faint">{m.orgnav_missing_body({ slug })}</p>
+    <p class="text-faint mt-2 text-sm">{m.orgnav_missing_body({ slug })}</p>
   </div>
 {:else}
   <div class="flex flex-col gap-6 sm:flex-row">
@@ -93,7 +93,7 @@
           <li>
             <a
               href={item.href}
-              class="block rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap text-muted transition hover:bg-raised hover:text-ink"
+              class="hover:bg-raised hover:text-ink block rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap text-muted transition"
               class:bg-raised={active(item.href, item.exact)}
               class:text-ink={active(item.href, item.exact)}
               aria-current={active(item.href, item.exact) ? 'page' : undefined}

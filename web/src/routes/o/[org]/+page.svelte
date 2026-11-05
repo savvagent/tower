@@ -120,7 +120,7 @@
   <div class="flex flex-wrap items-start justify-between gap-2">
     <div>
       <h1 class="text-lg font-semibold">{org.title}</h1>
-      <p class="mt-0.5 text-sm text-faint">
+      <p class="text-faint mt-0.5 text-sm">
         <code class="of-mono">{org.slug}</code> · {m.overview_role_and_plan({
           role: org.role ? roleLabel(org.role) : '—',
           plan: org.org?.plan ?? '—'
@@ -140,9 +140,9 @@
       exists only visually is a warning a blind reader has to guess at.
     -->
     {#if overview.parked}
-      <p role="status" class="max-w-xs text-right text-xs text-faint">{m.overview_paused()}</p>
+      <p role="status" class="text-faint max-w-xs text-right text-xs">{m.overview_paused()}</p>
     {:else if overview.stale}
-      <p role="status" class="max-w-xs text-right text-xs text-warn">{staleNote}</p>
+      <p role="status" class="text-warn max-w-xs text-right text-xs">{staleNote}</p>
     {/if}
   </div>
 
@@ -162,7 +162,7 @@
           <div class="text-2xl font-semibold {tile.tone}">
             {tile.value.toLocaleString(currentLocale())}
           </div>
-          <div class="mt-0.5 text-xs text-faint">{tile.label}</div>
+          <div class="text-faint mt-0.5 text-xs">{tile.label}</div>
         </div>
       {/each}
     </div>
@@ -177,7 +177,7 @@
     <div class="grid gap-6 lg:grid-cols-2">
       <Card title={m.overview_recent_title()} description={m.overview_recent_description()}>
         {#snippet actions()}
-          <a class="text-xs text-muted underline hover:text-ink" href="/o/{org.slug}/queue">
+          <a class="hover:text-ink text-xs text-muted underline" href="/o/{org.slug}/queue">
             {m.overview_open_queue()}
           </a>
         {/snippet}
@@ -185,22 +185,22 @@
         {#if recent.length === 0}
           <Empty title={m.overview_empty_title()}>
             {m.overview_empty_hint()}
-            <a class="text-muted underline hover:text-ink" href="/o/{org.slug}/connect">
+            <a class="hover:text-ink text-muted underline" href="/o/{org.slug}/connect">
               {m.overview_connect_one()}
             </a>.
           </Empty>
         {:else}
-          <ul class="divide-y divide-edge/40">
+          <ul class="divide-edge/40 divide-y">
             {#each recent as job (job.id)}
               <li class="flex items-center gap-3 py-2">
                 <span class="min-w-24 shrink-0"><StatusPill status={job.status} /></span>
                 <a
-                  class="min-w-0 flex-1 truncate text-sm text-ink hover:underline"
+                  class="text-ink min-w-0 flex-1 truncate text-sm hover:underline"
                   href="/o/{org.slug}/queue/{job.id}"
                 >
                   {job.title}
                 </a>
-                <span class="shrink-0 text-xs text-faint">{relative(job.createdAt)}</span>
+                <span class="text-faint shrink-0 text-xs">{relative(job.createdAt)}</span>
               </li>
             {/each}
           </ul>
@@ -210,7 +210,7 @@
       <div class="space-y-6">
         <Card title={m.overview_repos_title()} description={m.overview_repos_description()}>
           {#snippet actions()}
-            <a class="text-xs text-muted underline hover:text-ink" href="/o/{org.slug}/repos">
+            <a class="hover:text-ink text-xs text-muted underline" href="/o/{org.slug}/repos">
               {m.overview_repos_manage()}
             </a>
           {/snippet}
@@ -223,7 +223,7 @@
             <ul class="flex flex-wrap gap-2">
               {#each repos as repo (repo.id)}
                 <a
-                  class="of-mono rounded-md border border-edge px-2 py-1 text-xs text-muted transition hover:bg-raised hover:text-ink"
+                  class="of-mono border-edge hover:bg-raised hover:text-ink rounded-md border px-2 py-1 text-xs text-muted transition"
                   href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
                 >
                   {repo.slug}

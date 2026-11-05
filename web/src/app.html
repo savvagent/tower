@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!--
+      The console follows the OS between light and dark (`#lib/theme`). This lets
+      the browser's own canvas do the same before the script runs, so a dark-OS
+      visitor never sees a white frame.
+    -->
+    <meta name="color-scheme" content="light dark" />
+    <!--
       No indexing, and no referrer. Every page here is behind a session, and the
       URLs carry org slugs, repo slugs, and — on the verification and invitation
       pages — single-use tokens in the query string. A referrer header would
@@ -29,7 +35,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/apple-touch-icon.png" />
     %sveltekit.head%
   </head>
-  <body data-sveltekit-preload-data="hover" class="h-full bg-canvas text-ink antialiased">
+  <body data-sveltekit-preload-data="hover" class="h-full antialiased">
     <div style="display: contents" class="h-full">%sveltekit.body%</div>
   </body>
 </html>

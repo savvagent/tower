@@ -219,9 +219,10 @@ it (the package owns and tests them). `reconcile` is not called (Premise correct
 - **Six catalog entries per string.** No string is added: the shell's strings are the package's own
   Paraglide messages, in the same six locales (its `project.inlang` lists en, es, de, fr, it, hi).
   Keys only the old header used are removed from all six catalogs: `nav_back_to_platform`,
-  `nav_sign_out`, `nav_organizations`, `nav_platform_account`, `nav_platform_switch_org` (any other
-  key found unused after the change is removed the same way; `npm run check` proves the catalogs
-  stay complete). Kept: `nav_manage`, `nav_platform_members|teams|sso|usage`, `nav_sign_in`,
+  `nav_organizations`, `nav_platform_account`, `nav_platform_switch_org` (any other key found
+  unused after the change is removed the same way; `npm run check` proves the catalogs stay
+  complete). Kept: `nav_sign_out` (the plain fallback header's), `nav_manage`,
+  `nav_platform_members|teams|sso|usage`, `nav_sign_in`,
   `nav_api_reference`, and the session/sign-in states. The version label stays a literal
   `v{APP_VERSION}`, as today.
 

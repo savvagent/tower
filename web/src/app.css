@@ -1,60 +1,27 @@
 @import 'tailwindcss';
-
 /*
-  The console's palette, declared once as theme variables so Tailwind generates
-  `bg-surface`, `text-muted`, and friends. Naming the roles rather than the
-  colours is what keeps a status pill and a card from drifting apart when one of
-  them is restyled.
+  The shared Savvagent theme: the shadcn tokens (`bg-background`, `text-muted-foreground`,
+  `border-border` …) in light and dark, the `.dark` variant, and an `@source` for the shared
+  components. Every console imports the same file, so a colour changes in one place.
 */
-@theme {
-  --color-canvas: oklch(0.19 0.02 260);
-  --color-surface: oklch(0.24 0.02 260);
-  --color-raised: oklch(0.29 0.02 260);
-  --color-edge: oklch(0.36 0.02 260);
-  --color-ink: oklch(0.97 0.005 260);
-  --color-muted: oklch(0.72 0.02 260);
-  --color-faint: oklch(0.58 0.02 260);
-  --color-accent: oklch(0.75 0.14 220);
-  --color-accent-ink: oklch(0.2 0.05 240);
-
-  --color-ok: oklch(0.78 0.15 150);
-  --color-busy: oklch(0.8 0.14 90);
-  --color-warn: oklch(0.78 0.16 60);
-  --color-bad: oklch(0.7 0.19 25);
-}
+@import '@savvagent/console-ui/theme.css';
 
 @layer base {
-  body {
-    background-color: var(--color-canvas);
-    color: var(--color-ink);
-  }
-
   /*
     A visible focus ring on everything focusable, always. The console is a tool
     people drive from the keyboard, and Tailwind's reset removes the browser's
     default outline — leaving it removed is how a form becomes unusable without
-    a mouse.
+    a mouse. The shared components draw their own ring; this covers plain links
+    and controls.
   */
   :where(a, button, input, select, textarea, summary):focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--ring);
     outline-offset: 2px;
     border-radius: 0.25rem;
   }
 }
 
 @layer components {
-  .of-card {
-    @apply rounded-lg border border-edge/60 bg-surface/70;
-  }
-
-  .of-input {
-    @apply w-full rounded-md border border-edge bg-canvas px-3 py-2 text-sm text-ink placeholder:text-faint disabled:opacity-50;
-  }
-
-  .of-label {
-    @apply mb-1 block text-xs font-medium tracking-wide text-muted uppercase;
-  }
-
   /* Tokens, provisioning keys, job ids — anything that is copied, not read. */
   .of-mono {
     @apply font-mono text-sm break-all;

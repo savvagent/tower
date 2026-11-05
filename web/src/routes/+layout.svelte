@@ -1,21 +1,30 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+  import { ConsoleFooter, ConsoleHeader, type ConsoleOrg } from '@savvagent/console-ui';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
+  import { buttonVariants } from '@savvagent/console-ui/ui/button';
+  import * as DropdownMenu from '@savvagent/console-ui/ui/dropdown-menu';
   import type { Snippet } from 'svelte';
 
   import '../app.css';
   import { api } from '#lib/api.ts';
+  import { toConsoleSession } from '#lib/console-session.ts';
   import { messageFor } from '#lib/errors.ts';
   import { m } from '#lib/paraglide/messages.js';
   import { bootLocale } from '#lib/locale.ts';
   import { orgOf, signIn } from '#lib/login.ts';
-  import { platformHome, platformLink, type PlatformPage } from '#lib/platform.ts';
+  import {
+    platformHome,
+    platformLink,
+    shellPlatformUrl,
+    type PlatformPage
+  } from '#lib/platform.ts';
   import { PlatformHome } from '#lib/platform-home.svelte.ts';
   import { session } from '#lib/session.svelte.ts';
+  import { followColorScheme } from '#lib/theme.ts';
   import { APP_VERSION } from '#lib/version.ts';
-  import Alert from '#lib/components/Alert.svelte';
   import Loading from '#lib/components/Loading.svelte';
-  import Logo from '#lib/components/Logo.svelte';
 
   /**
    * Decide the language before anything renders.
@@ -27,6 +36,13 @@
    * ever renders English and then snaps to Spanish.
    */
   bootLocale();
+
+  /**
+   * Light or dark, before the first paint, for the same reason as the locale.
+   * The root layout lives as long as the document, so the listener is never
+   * removed.
+   */
+  followColorScheme(document.documentElement, matchMedia('(prefers-color-scheme: dark)'));
 
   let { children }: { children: Snippet } = $props();
 
@@ -103,32 +119,43 @@
   }
 
   /**
-   * Where "Back to Savvagent" goes: the platform's console.
+   * Where the platform is, for every link back to it: the shared header's
+   * "Savvagent" home link, its account and org menus, the footer, and the
+   * Manage menu.
    *
-   * A signed-in session already says where the platform is. A visitor without
-   * one — signed out, or whose session lookup failed — asks the open discovery
-   * document instead, once. Both come from the server at runtime; neither found
-   * means no link, never a guessed address.
+   * A signed-in session already says (`ConsoleSession.platformUrl`). A visitor
+   * without one — signed out, or whose session lookup failed — asks the open
+   * discovery document instead, once. Both come from the server at runtime.
+   * `shellPlatformUrl` refuses anything the shared shell would throw on, and
+   * neither answer usable means the plain header and footer below: no link,
+   * never a guessed address.
    */
   const home = new PlatformHome();
-
-  /**
-   * The session's platform address, scheme-checked. Every link into the
-   * platform is built from this, so the Manage menu gets the same defence in
-   * depth as the back link.
-   */
   const platformBase = $derived(platformHome(session.platformUrl));
 
   $effect(() => {
     home.observe(platformBase, session.ready);
   });
 
-  const platformHomeUrl = $derived(home.url(platformBase));
-  const platformHost = $derived(platformHomeUrl ? new URL(platformHomeUrl).host : undefined);
+  const platformUrl = $derived(shellPlatformUrl(home.url(platformBase)));
+
+  /** The session in the shell's shape, carrying the address that was checked. */
+  const consoleSession = $derived(
+    session.info && platformUrl ? toConsoleSession({ ...session.info, platformUrl }) : undefined
+  );
 
   /**
-   * What the platform's console manages, in the order a person looks for it.
-   * Identity is the platform's: this console links there rather than copying it.
+   * The org switcher stays inside this console. A session has exactly one org,
+   * so this is the current one; anything else would go through the org layout's
+   * sign-in for that org.
+   */
+  const orgHref = (org: ConsoleOrg) => `/o/${encodeURIComponent(org.slug)}`;
+
+  /**
+   * The org-scoped pages the platform's console manages. Identity is the
+   * platform's: this console links there rather than copying it. The account
+   * page and switching org are the shared header's account menu and org
+   * switcher.
    */
   const platformPages: { page: PlatformPage; label: () => string }[] = [
     { page: 'members', label: () => m.nav_platform_members() },
@@ -136,120 +163,111 @@
     { page: 'sso', label: () => m.nav_platform_sso() },
     { page: 'usage', label: () => m.nav_platform_usage() }
   ];
+
+  /**
+   * The version is a link only because the shared footer renders links; the API
+   * reference is the closest thing to release notes a customer can open.
+   */
+  const footerLinks = $derived([
+    { label: m.nav_api_reference(), href: '/docs/api' },
+    { label: `v${APP_VERSION}`, href: '/docs/api' }
+  ]);
 </script>
 
+<!--
+  Sign in is a full navigation to a server route that redirects to another
+  origin, so it is never a client-side `goto`.
+-->
+{#snippet signInLink()}
+  <a
+    href="/auth/login"
+    data-sveltekit-reload
+    class={buttonVariants({ variant: 'outline', size: 'sm' })}
+  >
+    {m.nav_sign_in()}
+  </a>
+{/snippet}
+
+{#snippet manage()}
+  {#if session.info && platformUrl}
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger class={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+        {m.nav_manage()}
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content align="start" class="min-w-48">
+        {#each platformPages as item (item.page)}
+          <DropdownMenu.Item>
+            {#snippet child({ props })}
+              <a {...props} href={platformLink(platformUrl, item.page, session.info!.org.slug)}>
+                {item.label()}
+              </a>
+            {/snippet}
+          </DropdownMenu.Item>
+        {/each}
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  {/if}
+{/snippet}
+
 <div class="flex min-h-full flex-col">
-  <header class="border-b border-edge/60 bg-surface/40">
-    <div class="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-3">
-      <a href="/" class="flex items-center gap-2" aria-label="Savvagent Tower">
-        <Logo class="size-6 text-accent" />
-      </a>
-
+  {#if consoleSession}
+    <ConsoleHeader
+      session={consoleSession}
+      service="tower"
+      onSignOut={signOut}
+      {orgHref}
+      nav={manage}
+    />
+  {:else if platformUrl && !session.info}
+    <ConsoleHeader {platformUrl} service="tower">
+      {#snippet signedOut()}
+        <!-- Only once the answer is in: a signed-in visitor must not glimpse "Sign in". -->
+        {#if session.ready}{@render signInLink()}{/if}
+      {/snippet}
+    </ConsoleHeader>
+  {:else}
+    <!--
+      No usable platform address: the shared header cannot render without one,
+      and a guessed address is never used. Same height and edge as the shared one.
+    -->
+    <header
+      class="flex items-center gap-2 border-b bg-background px-2 py-2 text-foreground sm:px-4"
+    >
+      <span class="px-2 text-sm font-semibold">Savvagent Tower</span>
+      <div class="flex-1"></div>
       {#if session.info}
-        <nav class="ml-2 flex gap-1 text-sm" aria-label={m.nav_organizations()}>
-          <!--
-            Truncated, with the full name in `title`: an org's name is the
-            customer's to choose, and a long one would otherwise push the
-            header past a phone's width.
-          -->
-          <a
-            href="/o/{session.info.org.slug}"
-            title={session.info.org.name}
-            class="block max-w-[10rem] truncate rounded-md bg-raised px-2.5 py-1 text-ink transition sm:max-w-xs"
-          >
-            {session.info.org.name}
-          </a>
-        </nav>
-
-        <!--
-          Everything identity-shaped lives at the platform. A native <details>
-          rather than a hand-rolled menu: it is keyboard- and screen-reader-
-          operable for free, and needs no script to stay in sync.
-        -->
-        {#if platformBase}
-          <details class="relative text-sm">
-            <summary
-              class="cursor-pointer list-none rounded-md px-2.5 py-1 text-muted transition hover:bg-raised hover:text-ink"
-            >
-              {m.nav_manage()}
-            </summary>
-            <ul
-              class="absolute left-0 z-10 mt-1 w-56 rounded-md border border-edge bg-surface p-1 shadow-lg"
-            >
-              {#each platformPages as item (item.page)}
-                <li>
-                  <a
-                    href={platformLink(platformBase, item.page, session.info.org.slug)}
-                    class="block rounded px-2.5 py-1.5 text-muted transition hover:bg-raised hover:text-ink"
-                  >
-                    {item.label()}
-                  </a>
-                </li>
-              {/each}
-            </ul>
-          </details>
-        {/if}
+        <button
+          type="button"
+          class={buttonVariants({ variant: 'outline', size: 'sm' })}
+          onclick={signOut}
+          disabled={signingOut}
+        >
+          {m.nav_sign_out()}
+        </button>
+      {:else if session.ready}
+        {@render signInLink()}
       {/if}
-
-      <div class="ml-auto flex items-center gap-3 text-sm">
-        {#if platformHomeUrl}
-          <!--
-            The way back to where this person signed in. Same tab: returning is
-            navigation, not a side trip. The host is in `title` so a hover says
-            exactly where it goes; the arrow is decoration. On a phone the
-            visible text shrinks to the product name so the header does not
-            overflow; `aria-label` keeps the full name at every width. That
-            short form is a literal on purpose, not a catalog entry: "otto" is a
-            product name and stays verbatim in every locale.
-          -->
-          <a
-            href={platformHomeUrl}
-            aria-label={m.nav_back_to_platform()}
-            title={platformHost}
-            class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 whitespace-nowrap text-muted transition hover:bg-raised hover:text-ink"
-          >
-            <span aria-hidden="true">←</span>
-            <span class="hidden sm:inline">{m.nav_back_to_platform()}</span>
-            <span class="sm:hidden">otto</span>
-          </a>
-        {/if}
-        {#if session.info}
-          <span class="hidden text-faint sm:inline"
-            >{session.info.user.email ?? session.info.user.name ?? ''}</span
-          >
-          <button
-            class="rounded-md border border-edge px-2.5 py-1 text-muted transition hover:bg-raised hover:text-ink disabled:opacity-50"
-            onclick={signOut}
-            disabled={signingOut}
-          >
-            {m.nav_sign_out()}
-          </button>
-        {:else if session.ready}
-          <a
-            href="/auth/login"
-            data-sveltekit-reload
-            class="rounded-md border border-edge px-2.5 py-1 text-muted transition hover:bg-raised hover:text-ink"
-          >
-            {m.nav_sign_in()}
-          </a>
-        {/if}
-      </div>
-    </div>
-  </header>
+    </header>
+  {/if}
 
   <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
     {#if isUngated}
       {@render children()}
     {:else if fatal}
-      <Alert>
-        {fatal}
-        <button class="ml-2 underline" onclick={() => location.reload()}>{m.nav_try_again()}</button
-        >
+      <Alert variant="destructive">
+        <span>
+          {fatal}
+          <button class="ml-2 underline" onclick={() => location.reload()}
+            >{m.nav_try_again()}</button
+          >
+        </span>
       </Alert>
     {:else if signInStuck}
-      <Alert>
-        {m.nav_sign_in_stuck()}
-        <a class="ml-2 underline" href="/auth/login" data-sveltekit-reload>{m.nav_sign_in()}</a>
+      <Alert variant="destructive">
+        <span>
+          {m.nav_sign_in_stuck()}
+          <a class="ml-2 underline" href="/auth/login" data-sveltekit-reload>{m.nav_sign_in()}</a>
+        </span>
       </Alert>
     {:else if !session.ready || !session.signedIn}
       <Loading what={m.nav_checking_session()} />
@@ -258,9 +276,15 @@
     {/if}
   </main>
 
-  <footer class="border-t border-edge/40 px-4 py-4 text-center text-xs text-faint">
-    <a class="hover:text-muted" href="/docs/api">{m.nav_api_reference()}</a>
-    <span aria-hidden="true"> · </span>
-    <span>v{APP_VERSION}</span>
-  </footer>
+  {#if platformUrl}
+    <ConsoleFooter {platformUrl} links={footerLinks} />
+  {:else}
+    <footer
+      class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t px-4 py-3 text-sm text-muted-foreground"
+    >
+      {#each footerLinks as link (link.label)}
+        <a href={link.href} class="hover:text-foreground">{link.label}</a>
+      {/each}
+    </footer>
+  {/if}
 </div>
