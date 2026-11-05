@@ -456,6 +456,12 @@ audit trail that they did not observe.
 > tab. The paragraphs below still describe the older shape where they mention the account's
 > locale, members, or the connect page.
 
+**The shell is shared.** The header, footer, theme, locale resolution and the UI primitives
+(alert, button, card, field, input …) come from `@savvagent/console-ui`, pinned to an exact version
+and installed from GitHub Packages (`web/.npmrc`, `NODE_AUTH_TOKEN`); a change to them is a change
+there, reaching this console as a reviewed version bump. Tower keeps only what is its own: the
+pages, `CopyField`, `Empty`, `Loading`, `Spinner`, `StatusPill`. `web/README.md` has the wiring.
+
 Six things hold. The first explains the next four; the sixth stands on its own.
 
 - **It is a single-page app for a security reason, not a performance one.** The session is
@@ -493,10 +499,10 @@ Six things hold. The first explains the next four; the sixth stands on its own.
   page in the wrong language. Plural categories are genuinely per-locale: `en`/`de`/`hi` take
   `one`/`other`, `es`/`fr`/`it` also take `many`.
 
-  The locale is the account's (`users.locale`, source of truth), cached in `localStorage` for
-  first paint, and detected from `navigator.languages` when nothing was chosen — where `NULL`
-  means "never chose", not "chose English". A change reloads the document, because `m.*()` are
-  plain calls with nothing for Svelte to invalidate. `tower_core::i18n` owns the locale list and a
+  The locale is resolved by the shared shell (`@savvagent/console-ui`): the choice cached in
+  `localStorage` (made in the shared header's language picker), else `navigator.languages`; the
+  session reports no account locale. A change reloads the document, because `m.*()` are plain
+  calls with nothing for Svelte to invalidate. `tower_core::i18n` owns the locale list and a
   test reads `web/project.inlang/settings.json` to prove the two halves agree.
 
   **The MCP surface stays English.** `tower-mcp` tool descriptions and `tower-core` error messages are
