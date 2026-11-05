@@ -127,6 +127,9 @@ or client-specific behaviour changes.
 
 ## §2 Theme and colour scheme
 
+`app.html`'s `<body class="… bg-canvas text-ink">` falls under the same mapping (the theme's base
+layer already styles `body`, so the classes are dropped).
+
 `app.css` becomes `@import 'tailwindcss'; @import '@savvagent/console-ui/theme.css';` plus the
 `.of-mono` component class (font only) and the visible-focus rule, rewritten onto `--ring`. Tower's
 own `@theme` palette and `.of-card`/`.of-input`/`.of-label` go.
@@ -160,7 +163,7 @@ OS too.
 - **Signed in:** `<ConsoleHeader session service="tower" onSignOut={signOut} orgHref={…}>` with a
   `nav` snippet holding the "Manage" menu (shared `DropdownMenu`, links from `platformLink`).
 - **Signed out, or the session lookup failed:** `<ConsoleHeader platformUrl={home} service="tower">`
-  with `home` from the existing `PlatformHome` discovery, and a `signedOut` snippet with the
+  with `home` from the existing `PlatformHome` discovery (through `shellPlatformUrl`), and a `signedOut` snippet with the
   "Sign in" link (a full navigation, `data-sveltekit-reload`) rendered only once `session.ready`.
 - **No platform address known** (signed out and discovery failed or pending): a plain `<header>` of
   the same height with the "Sign in" link. The shared header throws without a platform URL, and a
@@ -189,9 +192,53 @@ then calls the package's `resolveAtBoot(overwriteGetLocale)` with tower's Paragl
 `currentLocale` is imported from the package. The old resolution code and its tests move out with
 it (the package owns and tests them). `reconcile` is not called (Premise correction 4).
 
+## Invariants impact
+
+- **Static SPA, cookie in the browser.** Unchanged: `+layout.ts` keeps `ssr = false`,
+  `adapter-static` and the dev proxy are untouched, and the package needs no SvelteKit server
+  (its README: "SvelteKit is not required").
+- **Nothing about the deployment in the bundle.** Every platform link comes from
+  `session.platformUrl` or `/.well-known/oauth-protected-resource`, through one helper,
+  `shellPlatformUrl(url)` in `#lib/platform.ts`: `platformHome(url)` and then the package's
+  `checkPlatformUrl`, returning `undefined` on any refusal. The header, footer and Manage menu all
+  read it, so the fallback rule (§3) is one tested function. The service list is fetched at runtime
+  from that same address by the package. `grep -r savvagent.com web/build` stays empty.
+- **Runes only.** The new modules are plain TypeScript; the layout keeps `$state`/`$derived`/`$effect`.
+- **Server rules mirrored, not re-implemented.** Unchanged: org pages still show "no such
+  organization" for a `404`; `isAdmin` still only hides. `orgHref` returns tower's `/o/{slug}`, so a
+  click there goes through the existing org guard and, for any other org, through `#lib/login`'s
+  one-minute retry guard (the session has only its own org, so in practice it is the current one).
+- **Poller.** Untouched.
+- **Six catalog entries per string.** No string is added: the shell's strings are the package's own
+  Paraglide messages, in the same six locales (its `project.inlang` lists en, es, de, fr, it, hi).
+  Keys only the old header used are removed from all six catalogs: `nav_back_to_platform`,
+  `nav_sign_out`, `nav_organizations`, `nav_platform_account`, `nav_platform_switch_org` (any other
+  key found unused after the change is removed the same way; `npm run check` proves the catalogs
+  stay complete). Kept: `nav_manage`, `nav_platform_members|teams|sso|usage`, `nav_sign_in`,
+  `nav_api_reference`, and the session/sign-in states. The version label stays a literal
+  `v{APP_VERSION}`, as today.
+
+## Public interfaces and cost
+
+No public interface changes: no MCP tool, console API route, OAuth/discovery endpoint, `OF_*` key,
+or schema. Console URLs are unchanged. The only client-side state change is the `localStorage`
+locale key (`of.locale` → `otto.locale`), migrated on boot. Recurring cost: none. Package reads from
+GitHub Packages by Actions are covered by the existing grant and the org's plan.
+
+## Out-of-band
+
+| Item | Who | When |
+|---|---|---|
+| `web` and `docker-build` CI jobs install with the token | agent | on the PR's own CI run, which must show both jobs green |
+| Docker console stage refuses to build without the secret | agent | locally with podman, `--no-cache` so a cached `npm ci` layer cannot hide it |
+| Fly remote build receives `--build-secret` | agent observes, merge is Rob's or the release flow's | the `deploy` job runs only after a release-please PR merges; this PR cannot exercise it. Locally the agent proves the same Dockerfile with `podman build --secret`. After the release merges, the deploy job's log must show the console stage's `npm ci` succeeding and `/readyz` passing |
+| `fly.toml` | none | `--build-secret` needs no `[build]` change; the Dockerfile names the secret id |
+
 ## §7 Testing approach
 
-- Unit (vitest): `toConsoleSession`; `followColorScheme` (initial state, live change); 
+- Unit (vitest): `toConsoleSession`; `shellPlatformUrl` (https and loopback http pass; http off
+  loopback, credentials, `javascript:`, garbage and `undefined` give `undefined`);
+  `followColorScheme` (initial state, live change);
   `migrateLegacyCache` (copies, does not overwrite, drops unsupported, survives a throwing store).
 - Render tests (existing `page.render.test.ts` harnesses) keep passing against the new markup; the
   root-layout render test asserts the shared header renders and the platform link uses the session's
@@ -206,9 +253,11 @@ it (the package owns and tests them). `reconcile` is not called (Premise correct
 ## Error handling & edge cases
 
 - Platform URL failing `checkPlatformUrl` (not https, not loopback http, or with credentials):
-  the shared header would throw. `home`/`session.platformUrl` are first passed through
-  `platformHome`; a value the package would still reject (plain http off loopback) falls back to
-  the plain header (§3) instead of a crash.
+  the shared header would throw. Every value goes through `shellPlatformUrl` first; a refused value
+  renders the plain header and footer (§3, §4) instead of a crash.
+- Colour before the script runs: the static shell has no content until JavaScript runs, and the
+  `color-scheme` meta makes the browser's own canvas follow the OS, so a dark-OS visitor sees no
+  white frame; the `.dark` class is set synchronously in the root layout before first render.
 - Service list unreachable: the shared header shows its own error state; nothing in tower changes.
 - Sign-out failure: unchanged (cleared locally regardless).
 - `localStorage` blocked: the migration is wrapped like every other storage access.
