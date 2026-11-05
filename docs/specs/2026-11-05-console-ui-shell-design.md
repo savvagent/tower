@@ -1,7 +1,7 @@
 # Console UI shell design
 
-> **Status:** DRAFT — the tower console adopts the shared `@savvagent/console-ui@0.2.0` shell
-> (header, footer, theme, locale, shadcn-svelte components) and drops its own copies.
+> **Status:** IMPLEMENTED (#296) — the tower console renders in the shared `@savvagent/console-ui@0.2.0`
+> shell (header, footer, theme, locale, shadcn-svelte components) and keeps no copy of its own.
 >
 > **Implements:** savvagent/tower#293. **Part of:** savvagent/platform#154.
 
