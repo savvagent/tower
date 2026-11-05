@@ -6,11 +6,14 @@
   import { useOrg } from '#lib/org.svelte.ts';
   import { relative, slugPreview } from '#lib/format.ts';
   import type { Lease, Repo, RepoListItem, TrackerBinding, TrackerProvider } from '#lib/types.ts';
-  import Alert from '#lib/components/Alert.svelte';
-  import Button from '#lib/components/Button.svelte';
-  import Card from '#lib/components/Card.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
+  import { Button } from '@savvagent/console-ui/ui/button';
+  import { Card, CardContent, CardHeader, CardTitle } from '@savvagent/console-ui/ui/card';
   import Empty from '#lib/components/Empty.svelte';
-  import Field from '#lib/components/Field.svelte';
+  import { Field, FieldDescription, FieldGroup, FieldLabel } from '@savvagent/console-ui/ui/field';
+  import { Input } from '@savvagent/console-ui/ui/input';
+  import { Textarea } from '@savvagent/console-ui/ui/textarea';
+  import Spinner from '#lib/components/Spinner.svelte';
   import Loading from '#lib/components/Loading.svelte';
 
   /**
@@ -33,6 +36,8 @@
    */
 
   const org = useOrg();
+  /** Unique per instance, for the register form's label and hint ids. */
+  const formId = $props.id();
 
   let repos = $state<RepoListItem[]>([]);
   let includeInactive = $state(false);
@@ -246,7 +251,7 @@
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div>
       <h1 class="text-lg font-semibold">{m.repos_title()}</h1>
-      <p class="mt-0.5 text-sm text-faint">
+      <p class="mt-0.5 text-sm text-muted-foreground">
         {m.repos_subtitle()}
       </p>
     </div>
@@ -258,35 +263,70 @@
   </div>
 
   {#if showForm}
-    <Card title={m.repos_form_title()}>
-      <form class="space-y-4" onsubmit={register}>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <Field label={m.repos_field_slug_label()} hint={m.repos_field_slug_hint()}>
-            <input class="of-input of-mono" required bind:value={slug} />
-          </Field>
-          <Field label={m.repos_field_name_label()} hint={m.repos_field_name_hint()}>
-            <input class="of-input" bind:value={name} />
-          </Field>
-        </div>
+    <Card>
+      <CardHeader class="border-b">
+        <CardTitle><h2>{m.repos_form_title()}</h2></CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onsubmit={register}>
+          <FieldGroup>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <Field>
+                <FieldLabel for="{formId}-slug">{m.repos_field_slug_label()}</FieldLabel>
+                <Input
+                  id="{formId}-slug"
+                  class="of-mono"
+                  required
+                  aria-describedby="{formId}-slug-hint"
+                  bind:value={slug}
+                />
+                <FieldDescription id="{formId}-slug-hint">
+                  {m.repos_field_slug_hint()}
+                </FieldDescription>
+              </Field>
+              <Field>
+                <FieldLabel for="{formId}-name">{m.repos_field_name_label()}</FieldLabel>
+                <Input id="{formId}-name" aria-describedby="{formId}-name-hint" bind:value={name} />
+                <FieldDescription id="{formId}-name-hint">
+                  {m.repos_field_name_hint()}
+                </FieldDescription>
+              </Field>
+            </div>
 
-        <Field label={m.repos_field_remotes_label()} hint={m.repos_field_remotes_hint()}>
-          <textarea class="of-input of-mono h-24" bind:value={remotes}></textarea>
-        </Field>
+            <Field>
+              <FieldLabel for="{formId}-remotes">{m.repos_field_remotes_label()}</FieldLabel>
+              <Textarea
+                id="{formId}-remotes"
+                class="of-mono h-24"
+                aria-describedby="{formId}-remotes-hint"
+                bind:value={remotes}
+              />
+              <FieldDescription id="{formId}-remotes-hint">
+                {m.repos_field_remotes_hint()}
+              </FieldDescription>
+            </Field>
 
-        {#if formError}<Alert>{formError}</Alert>{/if}
+            {#if formError}<Alert variant="destructive">{formError}</Alert>{/if}
 
-        <Button type="submit" pending={creating}>{m.repos_submit()}</Button>
-      </form>
+            <div>
+              <Button type="submit" disabled={creating} aria-busy={creating}>
+                {#if creating}<Spinner />{/if}
+                {m.repos_submit()}
+              </Button>
+            </div>
+          </FieldGroup>
+        </form>
+      </CardContent>
     </Card>
   {/if}
 
-  <label class="flex items-center gap-2 text-xs text-muted">
+  <label class="flex items-center gap-2 text-xs text-muted-foreground">
     <input type="checkbox" bind:checked={includeInactive} />
     {m.repos_include_retired()}
   </label>
 
   {#if error}
-    <Alert>{error}</Alert>
+    <Alert variant="destructive">{error}</Alert>
   {:else if loading && repos.length === 0}
     <Loading what={m.repos_loading()} />
   {:else if repos.length === 0}
@@ -300,31 +340,33 @@
   {:else}
     <ul class="space-y-2">
       {#each repos as repo (repo.id)}
-        <li class="of-card">
+        <li class="of-surface">
           <div class="flex flex-wrap items-center gap-3 px-4 py-3">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
-                <span class="of-mono text-sm text-ink">{repo.slug}</span>
+                <span class="of-mono text-sm text-foreground">{repo.slug}</span>
                 {#if !repo.active}
-                  <span class="rounded-full border border-edge px-2 py-0.5 text-xs text-faint">
+                  <span
+                    class="rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground"
+                  >
                     {m.repos_badge_retired()}
                   </span>
                 {/if}
                 {#if repo.hasActiveLease}
                   <span
-                    class="rounded-full border border-busy/50 bg-busy/10 px-2 py-0.5 text-xs text-busy"
+                    class="rounded-full border border-warning/50 bg-warning/10 px-2 py-0.5 text-xs text-warning"
                   >
                     {m.repos_badge_in_use()}
                   </span>
                 {/if}
               </div>
-              <p class="mt-0.5 text-xs text-faint">
+              <p class="mt-0.5 text-xs text-muted-foreground">
                 {repo.name} · {repo.provider} · {repo.defaultBranch} · {teamName(repo.teamId)}
               </p>
             </div>
 
             <button
-              class="text-xs text-muted underline hover:text-ink"
+              class="text-xs text-muted-foreground underline hover:text-foreground"
               onclick={() => toggle(repo)}
               aria-expanded={expanded === repo.slug}
             >
@@ -332,29 +374,29 @@
             </button>
 
             <a
-              class="text-xs text-muted underline hover:text-ink"
+              class="text-xs text-muted-foreground underline hover:text-foreground"
               href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
             >
               {m.repos_queue_link()}
             </a>
 
             {#if org.isAdmin}
-              <Button tone="quiet" onclick={() => setActive(repo, !repo.active)}>
+              <Button variant="outline" onclick={() => setActive(repo, !repo.active)}>
                 {repo.active ? m.repos_retire() : m.repos_reinstate()}
               </Button>
             {/if}
           </div>
 
           {#if expanded === repo.slug}
-            <div class="border-t border-edge/60 px-4 py-3">
+            <div class="border-t border-border px-4 py-3">
               <div class="flex items-center gap-1.5">
-                <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">
+                <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                   {m.repos_leases_heading()}
                 </h3>
                 <div class="relative">
                   <button
                     type="button"
-                    class="flex h-4 w-4 items-center justify-center rounded-full border border-edge text-[10px] text-faint hover:text-ink"
+                    class="flex h-4 w-4 items-center justify-center rounded-full border border-border text-[10px] text-muted-foreground hover:text-foreground"
                     aria-label={m.repos_leases_info_label()}
                     aria-expanded={infoOpen}
                     aria-controls={`repos-lease-info-${repo.slug}`}
@@ -369,38 +411,38 @@
                   <div
                     id={`repos-lease-info-${repo.slug}`}
                     hidden={!infoOpen}
-                    class="absolute z-10 mt-1 w-64 rounded-md border border-edge bg-raised p-2 text-xs text-faint shadow-lg"
+                    class="absolute z-10 mt-1 w-64 rounded-md border border-border bg-muted p-2 text-xs text-muted-foreground shadow-lg"
                   >
                     {m.repos_leases_info_detail()}
                   </div>
                 </div>
               </div>
-              <p class="mt-1 text-xs text-faint">{m.repos_leases_note()}</p>
+              <p class="mt-1 text-xs text-muted-foreground">{m.repos_leases_note()}</p>
               {#if leases[repo.slug] === 'loading'}
                 <Loading what={m.repos_leases_loading()} />
               {:else if leases[repo.slug] === 'failed'}
-                <Alert>{m.repos_leases_failed()}</Alert>
+                <Alert variant="destructive">{m.repos_leases_failed()}</Alert>
               {:else if (leases[repo.slug] as Lease[]).length === 0}
-                <p class="text-xs text-faint">
+                <p class="text-xs text-muted-foreground">
                   {m.repos_no_leases({ repo: repo.slug })}
                 </p>
               {:else}
                 <ul class="space-y-1.5">
                   {#each leases[repo.slug] as Lease[] as lease (lease.id)}
                     <li class="flex flex-wrap items-baseline gap-x-3 text-sm">
-                      <span class="of-mono text-ink">{lease.resource}</span>
-                      <span class="text-muted">
+                      <span class="of-mono text-foreground">{lease.resource}</span>
+                      <span class="text-muted-foreground">
                         {lease.holderLabel ?? m.repos_lease_holder_unknown()}
                       </span>
                       {#if lease.jobId}
                         <a
-                          class="of-mono text-xs text-muted underline hover:text-ink"
+                          class="of-mono text-xs text-muted-foreground underline hover:text-foreground"
                           href="/o/{org.slug}/queue/{lease.jobId}"
                         >
                           {lease.jobId}
                         </a>
                       {/if}
-                      <span class="text-xs text-faint">
+                      <span class="text-xs text-muted-foreground">
                         {m.repos_lease_expires({ when: relative(lease.expiresAt) })}
                       </span>
                     </li>
@@ -409,15 +451,15 @@
               {/if}
             </div>
 
-            <div class="border-t border-edge/60 px-4 py-3">
-              <h3 class="text-xs font-semibold tracking-wide text-muted uppercase">
+            <div class="border-t border-border px-4 py-3">
+              <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 {m.repos_trackers_heading()}
               </h3>
 
               {#if bindings[repo.slug] === 'loading'}
                 <Loading what={m.repos_bindings_loading()} />
               {:else if bindings[repo.slug] === 'failed'}
-                <Alert>{m.repos_bindings_failed()}</Alert>
+                <Alert variant="destructive">{m.repos_bindings_failed()}</Alert>
               {:else}
                 <ul class="mt-2 space-y-3">
                   {#each PROVIDERS as { provider, name, hint } (provider)}
@@ -425,51 +467,55 @@
                     {@const key = `${repo.slug}:${provider}`}
                     <li>
                       <div class="flex flex-wrap items-end gap-2">
-                        <span class="w-14 shrink-0 text-sm text-ink">{name}</span>
+                        <span class="w-14 shrink-0 text-sm text-foreground">{name}</span>
 
                         {#if org.isAdmin}
                           <label class="min-w-0 flex-1">
                             <span class="sr-only">
                               {m.repos_binding_ref_label({ provider: name })}
                             </span>
-                            <input
-                              class="of-input of-mono"
-                              placeholder={hint}
-                              bind:value={refDraft[key]}
-                            />
+                            <Input class="of-mono" placeholder={hint} bind:value={refDraft[key]} />
                           </label>
                           <label class="w-32 shrink-0">
                             <span class="sr-only">
                               {m.repos_binding_trigger_label({ provider: name })}
                             </span>
-                            <input
-                              class="of-input of-mono"
+                            <Input
+                              class="of-mono"
                               placeholder="otto-tower"
                               bind:value={labelDraft[key]}
                             />
                           </label>
                           <Button
-                            pending={bindingBusy === key}
+                            disabled={bindingBusy === key}
+                            aria-busy={bindingBusy === key}
                             onclick={() => saveBinding(repo.slug, provider)}
                           >
+                            {#if bindingBusy === key}<Spinner />{/if}
                             {binding ? m.repos_binding_update() : m.repos_binding_bind()}
                           </Button>
                           {#if binding}
                             <Button
-                              tone="quiet"
-                              pending={bindingBusy === key}
+                              variant="outline"
+                              disabled={bindingBusy === key}
+                              aria-busy={bindingBusy === key}
                               onclick={() => removeBinding(repo.slug, provider)}
                             >
+                              {#if bindingBusy === key}<Spinner />{/if}
                               {m.repos_binding_remove()}
                             </Button>
                           {/if}
                         {:else if binding}
-                          <span class="of-mono text-sm text-muted">{binding.externalRef}</span>
-                          <span class="text-xs text-faint">
+                          <span class="of-mono text-sm text-muted-foreground"
+                            >{binding.externalRef}</span
+                          >
+                          <span class="text-xs text-muted-foreground">
                             {m.repos_binding_trigger_display({ label: binding.triggerLabel })}
                           </span>
                         {:else}
-                          <span class="text-xs text-faint">{m.repos_binding_unbound()}</span>
+                          <span class="text-xs text-muted-foreground"
+                            >{m.repos_binding_unbound()}</span
+                          >
                         {/if}
                       </div>
 
@@ -477,21 +523,23 @@
                         {@const parts = around(
                           m.repos_binding_inactive({ provider: name, link: LINK })
                         )}
-                        <p class="mt-1 text-xs text-faint">
+                        <p class="mt-1 text-xs text-muted-foreground">
                           {parts[0]}<a
-                            class="underline hover:text-ink"
+                            class="underline hover:text-foreground"
                             href="/o/{org.slug}/trackers">{m.repos_trackers_heading()}</a
                           >{parts[1]}
                         </p>
                       {/if}
                       {#if bindingError[key]}
-                        <p class="mt-1 text-xs text-rose-400">{bindingError[key]}</p>
+                        <p role="alert" class="mt-1 text-xs text-destructive">
+                          {bindingError[key]}
+                        </p>
                       {/if}
                     </li>
                   {/each}
                 </ul>
 
-                <p class="mt-3 text-xs text-faint">
+                <p class="mt-3 text-xs text-muted-foreground">
                   {m.repos_bindings_note({ githubRef: 'owner/repo' })}
                 </p>
               {/if}

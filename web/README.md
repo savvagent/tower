@@ -7,6 +7,8 @@ tracker connections, and the audit log. Sign-in, members, teams, SSO, usage, and
 the Savvagent platform's; the console signs in through it and links to it.
 
 ```bash
+gh auth refresh -h github.com -s read:packages   # once: gh's default login lacks it
+export NODE_AUTH_TOKEN=$(gh auth token)   # for @savvagent/console-ui (see below)
 npm install
 npm run dev      # Vite on :5173, proxying /api /auth /oauth /.well-known to OF_API_ORIGIN
 npm run check    # compile messages, check completeness, then svelte-check + tsc
@@ -99,7 +101,7 @@ lets an i18n layer exist here at all without a SvelteKit server.
 project.inlang/settings.json   the six locales and the base locale
 messages/{en,es,de,fr,it,hi}.json   the catalogs
 scripts/check-messages.mjs     the completeness gate, wired into `npm run check`
-src/lib/locale.ts              which language this document is in, and how it got there
+src/lib/locale.ts              boots the shared shell's locale resolution with this runtime
 src/lib/errors.ts              ApiError.code / WebauthnError.code → a sentence
 src/lib/labels.ts              JobStatus / role → a word (the wire value never changes)
 src/lib/paraglide/**           generated. git-ignored, prettier-ignored, never edited.
@@ -148,28 +150,48 @@ have no client-side JS to swap strings and share no keys with these catalogs.
 
 ## Which language, and how it is remembered
 
-Two tiers now, each with one job:
+The shared shell decides (`@savvagent/console-ui`, README "Locale"), and its header carries the
+language picker. Two tiers, each with one job:
 
-| Tier                        | Holds                         | Authority                        |
-| --------------------------- | ----------------------------- | -------------------------------- |
-| `localStorage['of.locale']` | a choice made in this browser | wins when present                |
-| `navigator.languages`       | the browser's preference      | fallback when nothing was chosen |
+| Tier                          | Holds                         | Authority                        |
+| ----------------------------- | ----------------------------- | -------------------------------- |
+| `localStorage['otto.locale']` | a choice made in this browser | wins when present                |
+| `navigator.languages`         | the browser's preference      | fallback when nothing was chosen |
 
-There used to be a third, the account's `users.locale` on Savvagent Tower's own user row, which was
-the source of truth so a choice followed the person between devices. Accounts are the
-platform's now and its API reports no locale, so nothing in the console sets the language
-today beyond the browser's preference. `locale.ts` keeps `reconcile` and `applyLocale` for when
-the platform exposes one (or a picker returns); nothing calls them yet.
+`src/lib/locale.ts`'s `bootLocale` runs at the top of the root layout: it moves a choice this
+console cached under its old key (`of.locale`) to the shared one, once, then calls the package's
+`resolveAtBoot` with this console's Paraglide runtime so tower's messages and the shell's agree.
+The session reports no account locale, so `reconcile` is not called.
 
 A change of language **reloads the document**. Paraglide's `m.*()` are plain calls, not reactive
-reads, so Svelte has no dependency to invalidate when the locale changes underneath them.
-`locale.ts`'s `needsReload` is split out so the termination argument is a test rather than a
-comment: the cache is written _before_ the reload, so the next boot resolves to exactly the
-value that triggered it.
+reads, so Svelte has no dependency to invalidate when the locale changes underneath them. The
+package writes the cache _before_ the reload, so the next boot resolves to exactly the value that
+triggered it, and it sets `<html lang>` from script at boot (`app.html` ships `lang="en"`, and
+`adapter-static` emits one shell for every route).
 
-`<html lang>` is set from script at boot. `app.html` ships `lang="en"` and is not templated per
-locale — `adapter-static` emits one shell for every route and there is no server to pick a
-language for it.
+## The shared shell
+
+`@savvagent/console-ui` is pinned to an exact version and installed from GitHub Packages, which
+needs a token with `read:packages` as `NODE_AUTH_TOKEN` wherever the dependencies are installed
+(`.npmrc` names it by reference only). Locally, `gh auth refresh -h github.com -s read:packages`
+once, then `export NODE_AUTH_TOKEN=$(gh auth token)`; that token can do everything your login can,
+so for a build that leaves this machine (`fly deploy`) use a classic token with only
+`read:packages` instead. CI's
+`web` and `docker-build` jobs use the job token; the image's console stage reads it from a BuildKit
+secret (`podman build --secret id=NODE_AUTH_TOKEN,env=NODE_AUTH_TOKEN .`, `fly deploy
+--build-secret NODE_AUTH_TOKEN=…`), never a build argument.
+
+- **Theme.** `app.css` imports `@savvagent/console-ui/theme.css`; pages use its tokens
+  (`bg-background`, `bg-card`, `text-muted-foreground`, `border-border`, `text-destructive`,
+  `text-warning`, `text-success` …), never a colour of their own. Dark is a `.dark` class on
+  `<html>`, which `src/lib/theme.ts` keeps in step with the OS.
+- **Header and footer.** The root layout maps the session with `toConsoleSession`
+  (`src/lib/console-session.ts`) and renders `ConsoleHeader` / `ConsoleFooter`. Every link back to
+  the platform comes from the session's `platformUrl`, or, signed out, from
+  `/.well-known/oauth-protected-resource`, through `shellPlatformUrl` (`src/lib/platform.ts`).
+  With neither, a plain header and footer render: the shared ones throw without an address, and
+  this console never guesses one.
+- **Components.** Import each from its subpath, `@savvagent/console-ui/ui/<name>`.
 
 ## Layout
 
@@ -180,7 +202,7 @@ language for it.
 | `src/lib/session.svelte.ts` | Who is signed in. A rune module, not a store.                                            |
 | `src/lib/org.svelte.ts`     | The org the current route is about, via context.                                         |
 | `src/lib/login.ts`          | Starting sign-in, and the loop guard.                                                    |
-| `src/lib/platform.ts`       | Links into the platform's own console.                                                   |
+| `src/lib/platform.ts`       | Links into the platform's own console, and the address the shared shell may be given.    |
 | `src/lib/poll.svelte.ts`    | Polling a page hands to an `$effect`. The overview and `/queue` use it; `/repos` should. |
 | `src/routes/`               | Public pages at the root; org pages under `/o/[org]`.                                    |
 | `worker/index.ts`           | The Cloudflare Worker: serves this bundle, proxies the API to `tower-server`.            |

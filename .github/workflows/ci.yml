@@ -139,19 +139,42 @@ jobs:
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # This repo is public and the package is private. A pull request from a fork is still issued a
+    # read-only job token, and `packages: read` is a read scope, so code the fork controls (its
+    # workflow copy, package scripts, the Dockerfile) could read the package with it. Such PRs skip
+    # this job; a maintainer re-pushes the change to a branch here to build it.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # `packages: read` lets the job's own token install @savvagent/console-ui from GitHub
+    # Packages (web/.npmrc); the package grants this repo Actions read access.
+    permissions:
+      contents: read
+      packages: read
     defaults:
       run:
         working-directory: web
     steps:
-      - uses: actions/checkout@v4
+      # `persist-credentials: false`: checkout would otherwise leave the job token in .git/config,
+      # where every later step (and every dev dependency they load) could read it. Nothing here
+      # pushes.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      # No `cache: npm`: the npm cache would hold the private package's tarball, and Actions caches
+      # written on master can be restored from any branch, fork pull requests included.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: web/package-lock.json
 
-      - run: npm ci
+      # The token is in the environment of the download only, and no package code runs while it
+      # is: install scripts run afterwards, in `npm rebuild`, without it. (The job as a whole still
+      # holds the token, which a step could recover from the runner's memory; keeping it out of
+      # every other step's environment is what this does, not more.)
+      - run: npm ci --ignore-scripts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: npm rebuild
 
       - run: npm run check
 
@@ -166,13 +189,24 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # This repo is public and the package is private. A pull request from a fork is still issued a
+    # read-only job token, and `packages: read` is a read scope, so code the fork controls (its
+    # workflow copy, package scripts, the Dockerfile) could read the package with it. Such PRs skip
+    # this job too; a maintainer re-pushes the change to a branch here to build it.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    # The console stage installs @savvagent/console-ui from GitHub Packages.
+    permissions:
+      contents: read
+      packages: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Check for image-relevant changes
         if: github.event_name == 'pull_request'
         id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
         with:
           filters: |
             image:
@@ -181,17 +215,38 @@ jobs:
               - 'Cargo.lock'
               - 'web/**'
 
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
         if: github.event_name == 'push' || steps.filter.outputs.image == 'true'
 
       - name: Build image
         if: github.event_name == 'push' || steps.filter.outputs.image == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # `mode=min` exports only the final image's layers. `mode=max` would export the console
+          # stage's `npm ci` layer too, with the private package in it, into a cache any branch can
+          # restore; the final image holds only the built bundle, which is public anyway.
+          cache-to: type=gha,mode=min
+          # A BuildKit secret, mounted only for the Dockerfile's `npm ci`: never a build-arg,
+          # so it is in no layer and not in the build cache exported above.
+          secrets: |
+            NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+  # The other half of the fork gate on `web` and `docker-build`: a skipped job reads as passing,
+  # so without this a fork's pull request would show those checks green without running them.
+  # This fails on purpose and says what to do. (The gate itself only stops a fork that leaves this
+  # file alone; the package's access grant is what a fork editing its copy of the workflow meets.)
+  fork-pr-needs-branch:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - run: |
+          echo "::error::web and docker-build need the private @savvagent/console-ui package and do not run on pull requests from forks. A maintainer should push this change to a branch of savvagent/tower and open a pull request from it."
+          exit 1
 
   # Enforces Conventional Commits on PR titles, which become the master commit on squash-merge --
   # release-please's version-bump computation reads a commit's type (feat/fix/...), so a title
@@ -310,14 +365,25 @@ jobs:
       name: production
       # Flipped to the tower.savvagent.com host (docs/deploy/fly.md, "Runbook: move to tower.savvagent.com").
       url: https://tower.savvagent.com
+    # `packages: read` is for the image's console stage, which installs @savvagent/console-ui
+    # from GitHub Packages on Fly's remote builder.
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1 # v1
 
+      # `--build-secret` reaches only the Dockerfile's secret mount, never a layer. The YAML
+      # never spells the token out and Actions masks it in the log, but once the shell expands
+      # it, it is in flyctl's argv on this runner, and Fly's remote builder receives it for the
+      # build. Accepted: the job token is read-only (contents, packages) and expires with this
+      # job.
       - name: Deploy to Fly.io
-        run: flyctl deploy --remote-only -a otto-factory-mcp
+        run: flyctl deploy --remote-only -a otto-factory-mcp --build-secret NODE_AUTH_TOKEN="$NODE_AUTH_TOKEN"
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

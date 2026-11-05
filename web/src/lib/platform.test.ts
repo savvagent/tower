@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { discoverPlatformUrl, platformHome, platformLink } from './platform';
+import { discoverPlatformUrl, platformHome, platformLink, shellPlatformUrl } from './platform';
 
 describe('platformLink', () => {
   it('points org-scoped pages at the org on the platform', () => {
@@ -9,13 +9,6 @@ describe('platformLink', () => {
         `https://otto.example/o/acme/${page}`
       );
     }
-  });
-
-  it('points account and org switching at the platform itself', () => {
-    expect(platformLink('https://otto.example', 'account', 'acme')).toBe(
-      'https://otto.example/settings'
-    );
-    expect(platformLink('https://otto.example', 'orgs', 'acme')).toBe('https://otto.example');
   });
 
   it('survives a trailing slash and encodes the slug', () => {
@@ -95,6 +88,27 @@ describe('discoverPlatformUrl', () => {
     ];
     for (const fetcher of cases) {
       await expect(discoverPlatformUrl(fetcher)).resolves.toBeUndefined();
+    }
+  });
+});
+
+describe('shellPlatformUrl', () => {
+  it('accepts https, and plain http only on loopback', () => {
+    expect(shellPlatformUrl('https://savvagent.example/')).toBe('https://savvagent.example');
+    expect(shellPlatformUrl('http://127.0.0.1:18081')).toBe('http://127.0.0.1:18081');
+    expect(shellPlatformUrl('http://localhost:3000')).toBe('http://localhost:3000');
+  });
+
+  it('refuses what the shared header would throw on, rather than crash the page', () => {
+    for (const url of [
+      'http://savvagent.example',
+      'https://user:pass@savvagent.example',
+      'javascript:alert(1)',
+      'not a url',
+      '',
+      undefined
+    ]) {
+      expect(shellPlatformUrl(url)).toBeUndefined();
     }
   });
 });

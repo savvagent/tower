@@ -5,7 +5,7 @@
   import { useOrg } from '#lib/org.svelte.ts';
   import { absolute, relative } from '#lib/format.ts';
   import type { AuditEvent } from '#lib/types.ts';
-  import Alert from '#lib/components/Alert.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
   import Empty from '#lib/components/Empty.svelte';
   import Loading from '#lib/components/Loading.svelte';
 
@@ -59,21 +59,21 @@
 <div class="space-y-5">
   <div>
     <h1 class="text-lg font-semibold">{m.audit_title()}</h1>
-    <p class="mt-0.5 text-sm text-faint">
+    <p class="mt-0.5 text-sm text-muted-foreground">
       {m.audit_subtitle({ org: org.title })}
     </p>
   </div>
 
   {#if error}
-    <Alert>{error}</Alert>
+    <Alert variant="destructive">{error}</Alert>
   {:else if loading && events.length === 0}
     <Loading what={m.audit_loading()} />
   {:else if events.length === 0}
     <Empty title={m.audit_empty()} />
   {:else}
-    <div class="of-card overflow-x-auto">
+    <div class="of-surface overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="border-b border-edge/60 text-left text-xs text-faint">
+        <thead class="border-b border-border text-left text-xs text-muted-foreground">
           <tr>
             <th class="px-4 py-2 font-medium">{m.audit_col_when()}</th>
             <th class="px-4 py-2 font-medium">{m.audit_col_action()}</th>
@@ -82,18 +82,26 @@
             <th class="px-4 py-2 font-medium">{m.audit_col_detail()}</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-edge/40">
+        <tbody class="divide-y divide-border">
           {#each events as event (event.id)}
-            <tr class="hover:bg-raised/40">
-              <td class="px-4 py-2 whitespace-nowrap text-faint" title={absolute(event.createdAt)}>
+            <tr class="hover:bg-muted/40">
+              <td
+                class="px-4 py-2 whitespace-nowrap text-muted-foreground"
+                title={absolute(event.createdAt)}
+              >
                 {relative(event.createdAt)}
               </td>
-              <td class="of-mono px-4 py-2 whitespace-nowrap text-ink">{event.action}</td>
-              <td class="px-4 py-2 text-muted">{event.actorLabel ?? event.actorUserId ?? '—'}</td>
-              <td class="px-4 py-2 text-muted">
+              <td class="of-mono px-4 py-2 whitespace-nowrap text-foreground">{event.action}</td>
+              <td class="px-4 py-2 text-muted-foreground"
+                >{event.actorLabel ?? event.actorUserId ?? '—'}</td
+              >
+              <td class="px-4 py-2 text-muted-foreground">
                 {event.targetType ? `${event.targetType} ${event.targetId ?? ''}` : '—'}
               </td>
-              <td class="of-mono max-w-64 truncate px-4 py-2 text-faint" title={detail(event)}>
+              <td
+                class="of-mono max-w-64 truncate px-4 py-2 text-muted-foreground"
+                title={detail(event)}
+              >
                 {detail(event)}
               </td>
             </tr>

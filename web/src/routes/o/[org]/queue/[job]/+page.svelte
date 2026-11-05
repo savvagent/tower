@@ -8,8 +8,14 @@
   import { absolute, relative } from '#lib/format.ts';
   import { isClaimStranded } from '#lib/jobs.ts';
   import type { JobDetail, Repo } from '#lib/types.ts';
-  import Alert from '#lib/components/Alert.svelte';
-  import Card from '#lib/components/Card.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
+  import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+  } from '@savvagent/console-ui/ui/card';
   import Loading from '#lib/components/Loading.svelte';
   import StatusPill from '#lib/components/StatusPill.svelte';
 
@@ -69,7 +75,9 @@
 
 <div class="space-y-5">
   <p class="text-xs">
-    <a class="text-muted underline hover:text-ink" href="/o/{org.slug}/queue">{m.job_back()}</a>
+    <a class="text-muted-foreground underline hover:text-foreground" href="/o/{org.slug}/queue"
+      >{m.job_back()}</a
+    >
   </p>
 
   {#if missing}
@@ -79,10 +87,10 @@
         The org name and the id sit inside the sentence rather than either side
         of a `<code>`: where they fall in it is a fact about the language.
       -->
-      <p class="mt-2 text-sm text-faint">{m.job_missing_body({ org: org.title, id })}</p>
+      <p class="mt-2 text-sm text-muted-foreground">{m.job_missing_body({ org: org.title, id })}</p>
     </div>
   {:else if error}
-    <Alert>{error}</Alert>
+    <Alert variant="destructive">{error}</Alert>
   {:else if !job}
     <Loading what={m.job_loading({ id })} />
   {:else}
@@ -91,103 +99,156 @@
         <h1 class="text-lg font-semibold">{job.title}</h1>
         <StatusPill status={job.status} />
       </div>
-      <p class="of-mono mt-1 text-xs text-faint">{job.id}</p>
+      <p class="of-mono mt-1 text-xs text-muted-foreground">{job.id}</p>
       {#if (job.status === 'in-progress' || job.status === 'active') && job.cancelRequestedAt}
-        <p class="mt-1 text-xs font-medium text-bad">{m.job_cancellation_requested()}</p>
+        <p class="mt-1 text-xs font-medium text-destructive">{m.job_cancellation_requested()}</p>
       {/if}
       {#if isClaimStranded(job)}
-        <p class="mt-1 text-xs font-medium text-bad">{m.job_claim_stranded()}</p>
+        <p class="mt-1 text-xs font-medium text-destructive">{m.job_claim_stranded()}</p>
       {/if}
     </div>
 
     {#if job.description}
-      <Card title={m.job_description_title()}>
-        <p class="text-sm whitespace-pre-wrap text-muted">{job.description}</p>
+      <Card>
+        <CardHeader class="border-b">
+          <CardTitle><h2>{m.job_description_title()}</h2></CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p class="text-sm whitespace-pre-wrap text-muted-foreground">{job.description}</p>
+        </CardContent>
       </Card>
     {/if}
 
     {#if (job.status === 'failed' || job.status === 'cancelled') && job.error}
-      <Alert>{job.error}</Alert>
+      <Alert variant="destructive">{job.error}</Alert>
     {/if}
 
     {#if job.status === 'completed' && job.result}
-      <Card title={m.job_result_title()}>
-        <p class="text-sm whitespace-pre-wrap text-muted">{job.result}</p>
+      <Card>
+        <CardHeader class="border-b">
+          <CardTitle><h2>{m.job_result_title()}</h2></CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p class="text-sm whitespace-pre-wrap text-muted-foreground">{job.result}</p>
+        </CardContent>
       </Card>
     {/if}
 
-    <Card title={m.job_details_title()}>
-      <dl class="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
-        <div>
-          <dt class="of-label">{m.job_field_repo()}</dt>
-          <dd>
-            {#if repo}
-              <a
-                class="of-mono text-muted underline hover:text-ink"
-                href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
-              >
-                {repo.slug}
-              </a>
-            {:else}
-              <span class="text-faint">—</span>
-            {/if}
-          </dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_ticket()}</dt>
-          <dd class="text-muted">{job.ticketRef ?? '—'}{job.tracker ? ` (${job.tracker})` : ''}</dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_claimed_by()}</dt>
-          <dd class="text-muted">{job.claimedByLabel ?? '—'}</dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_agent_type()}</dt>
-          <dd class="text-muted">{job.agentType ?? m.job_agent_type_any()}</dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_queued()}</dt>
-          <dd class="text-muted" title={absolute(job.createdAt)}>{relative(job.createdAt)}</dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_started()}</dt>
-          <dd class="text-muted" title={absolute(job.startedAt)}>{relative(job.startedAt)}</dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_finished()}</dt>
-          <dd class="text-muted" title={absolute(job.completedAt)}>{relative(job.completedAt)}</dd>
-        </div>
-        <div>
-          <dt class="of-label">{m.job_field_attempts()}</dt>
-          <dd class="text-muted">{job.attempts}</dd>
-        </div>
-        {#if job.cancelReason}
+    <Card>
+      <CardHeader class="border-b">
+        <CardTitle><h2>{m.job_details_title()}</h2></CardTitle>
+      </CardHeader>
+      <CardContent>
+        <dl class="grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-2">
           <div>
-            <dt class="of-label">{m.job_cancellation_requested()}</dt>
-            <dd class="text-muted">{job.cancelReason}</dd>
+            <dt class="of-label">
+              {m.job_field_repo()}
+            </dt>
+            <dd>
+              {#if repo}
+                <a
+                  class="of-mono text-muted-foreground underline hover:text-foreground"
+                  href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
+                >
+                  {repo.slug}
+                </a>
+              {:else}
+                <span class="text-muted-foreground">—</span>
+              {/if}
+            </dd>
           </div>
-        {/if}
-      </dl>
+          <div>
+            <dt class="of-label">
+              {m.job_field_ticket()}
+            </dt>
+            <dd class="text-muted-foreground">
+              {job.ticketRef ?? '—'}{job.tracker ? ` (${job.tracker})` : ''}
+            </dd>
+          </div>
+          <div>
+            <dt class="of-label">
+              {m.job_field_claimed_by()}
+            </dt>
+            <dd class="text-muted-foreground">{job.claimedByLabel ?? '—'}</dd>
+          </div>
+          <div>
+            <dt class="of-label">
+              {m.job_field_agent_type()}
+            </dt>
+            <dd class="text-muted-foreground">{job.agentType ?? m.job_agent_type_any()}</dd>
+          </div>
+          <div>
+            <dt class="of-label">
+              {m.job_field_queued()}
+            </dt>
+            <dd class="text-muted-foreground" title={absolute(job.createdAt)}>
+              {relative(job.createdAt)}
+            </dd>
+          </div>
+          <div>
+            <dt class="of-label">
+              {m.job_field_started()}
+            </dt>
+            <dd class="text-muted-foreground" title={absolute(job.startedAt)}>
+              {relative(job.startedAt)}
+            </dd>
+          </div>
+          <div>
+            <dt class="of-label">
+              {m.job_field_finished()}
+            </dt>
+            <dd class="text-muted-foreground" title={absolute(job.completedAt)}>
+              {relative(job.completedAt)}
+            </dd>
+          </div>
+          <div>
+            <dt class="of-label">
+              {m.job_field_attempts()}
+            </dt>
+            <dd class="text-muted-foreground">{job.attempts}</dd>
+          </div>
+          {#if job.cancelReason}
+            <div>
+              <dt class="of-label">
+                {m.job_cancellation_requested()}
+              </dt>
+              <dd class="text-muted-foreground">{job.cancelReason}</dd>
+            </div>
+          {/if}
+        </dl>
+      </CardContent>
     </Card>
 
     {#if job.dependsOn.length > 0}
-      <Card title={m.job_waiting_on_title()} description={m.job_waiting_on_description()}>
-        <ul class="flex flex-wrap gap-2">
-          {#each job.dependsOn as dependency (dependency)}
-            <a
-              class="of-mono rounded-md border border-edge px-2 py-1 text-xs text-muted transition hover:bg-raised hover:text-ink"
-              href="/o/{org.slug}/queue/{dependency}"
-            >
-              {dependency}
-            </a>
-          {/each}
-        </ul>
+      <Card>
+        <CardHeader class="border-b">
+          <CardTitle><h2>{m.job_waiting_on_title()}</h2></CardTitle>
+          <CardDescription>{m.job_waiting_on_description()}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ul class="flex flex-wrap gap-2">
+            {#each job.dependsOn as dependency (dependency)}
+              <a
+                class="of-mono rounded-md border border-border px-2 py-1 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                href="/o/{org.slug}/queue/{dependency}"
+              >
+                {dependency}
+              </a>
+            {/each}
+          </ul>
+        </CardContent>
       </Card>
     {/if}
 
     {#if metadata}
-      <Card title={m.job_metadata_title()} description={m.job_metadata_description()}>
-        <pre class="of-mono overflow-x-auto whitespace-pre text-muted">{metadata}</pre>
+      <Card>
+        <CardHeader class="border-b">
+          <CardTitle><h2>{m.job_metadata_title()}</h2></CardTitle>
+          <CardDescription>{m.job_metadata_description()}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <pre class="of-mono overflow-x-auto whitespace-pre text-muted-foreground">{metadata}</pre>
+        </CardContent>
       </Card>
     {/if}
   {/if}

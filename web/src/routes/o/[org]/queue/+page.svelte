@@ -12,7 +12,7 @@
   import { Poller } from '#lib/poll.svelte.ts';
   import { fatalApiFailure } from '#lib/poll-fatal.ts';
   import type { Job, JobStatus, Repo } from '#lib/types.ts';
-  import Alert from '#lib/components/Alert.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
   import Empty from '#lib/components/Empty.svelte';
   import Loading from '#lib/components/Loading.svelte';
   import StatusPill from '#lib/components/StatusPill.svelte';
@@ -138,14 +138,14 @@
 <div class="space-y-4">
   <div class="flex flex-wrap items-baseline justify-between gap-2">
     <h1 class="text-lg font-semibold">{m.queue_title()}</h1>
-    <p class="text-xs text-faint">{m.queue_read_only_note()}</p>
+    <p class="text-xs text-muted-foreground">{m.queue_read_only_note()}</p>
   </div>
 
-  <div class="of-card flex flex-wrap items-end gap-3 px-4 py-3">
+  <div class="of-surface flex flex-wrap items-end gap-3 px-4 py-3">
     <label class="block">
       <span class="of-label">{m.queue_filter_status()}</span>
       <select
-        class="of-input min-w-40"
+        class="of-select min-w-40"
         value={status ?? ''}
         onchange={(e) => setFilter('status', e.currentTarget.value)}
       >
@@ -161,7 +161,7 @@
     <label class="block">
       <span class="of-label">{m.queue_filter_repo()}</span>
       <select
-        class="of-input min-w-44"
+        class="of-select min-w-44"
         value={repo ?? ''}
         onchange={(e) => setFilter('repo', e.currentTarget.value)}
       >
@@ -186,13 +186,13 @@
       what is being filtered on.
     -->
     {#if team}
-      <div class="pb-2 text-sm text-muted">
+      <div class="pb-2 text-sm text-muted-foreground">
         <span class="of-label">{m.queue_filter_team()}</span>
         <code class="of-mono ml-1">{team}</code>
       </div>
     {/if}
 
-    <label class="flex items-center gap-2 pb-2 text-sm text-muted">
+    <label class="flex items-center gap-2 pb-2 text-sm text-muted-foreground">
       <input
         type="checkbox"
         checked={mine}
@@ -203,7 +203,7 @@
 
     {#if filtered}
       <button
-        class="ml-auto pb-2 text-xs text-muted underline hover:text-ink"
+        class="ml-auto pb-2 text-xs text-muted-foreground underline hover:text-foreground"
         onclick={() => applyFilters(page.url.pathname)}
       >
         {m.queue_clear_filters()}
@@ -212,13 +212,13 @@
   </div>
 
   {#if navError}
-    <Alert>{navError}</Alert>
+    <Alert variant="destructive">{navError}</Alert>
   {/if}
 
   {#if jobsPoll.parked}
-    <p role="status" class="text-xs text-faint">{m.queue_paused()}</p>
+    <p role="status" class="text-xs text-muted-foreground">{m.queue_paused()}</p>
   {:else if jobsPoll.stale}
-    <p role="status" class="text-xs text-warn">
+    <p role="status" class="text-xs text-warning">
       {m.queue_refresh_failed({
         reason: messageFor(jobsPoll.error, m.error_network()),
         age: relative(
@@ -229,7 +229,7 @@
   {/if}
 
   {#if pollError}
-    <Alert>
+    <Alert variant="destructive">
       {pollError}
       {#if !jobsPoll.stopped && !jobsPoll.parked}{m.queue_retrying()}{/if}
     </Alert>
@@ -239,15 +239,18 @@
     <Empty title={filtered ? m.queue_empty_filtered() : m.queue_empty_title()}>
       {#if !filtered}
         {m.queue_empty_hint()}
-        <a class="text-muted underline hover:text-ink" href="/o/{org.slug}/connect">
+        <a
+          class="text-muted-foreground underline hover:text-foreground"
+          href="/o/{org.slug}/connect"
+        >
           {m.queue_connect_one()}
         </a>.
       {/if}
     </Empty>
   {:else}
-    <div class="of-card overflow-x-auto">
+    <div class="of-surface overflow-x-auto">
       <table class="w-full text-sm">
-        <thead class="border-b border-edge/60 text-left text-xs text-faint">
+        <thead class="border-b border-border text-left text-xs text-muted-foreground">
           <tr>
             <th class="px-4 py-2 font-medium">{m.queue_col_job()}</th>
             <th class="px-4 py-2 font-medium">{m.queue_col_status()}</th>
@@ -256,26 +259,28 @@
             <th class="px-4 py-2 font-medium">{m.queue_col_queued()}</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-edge/40">
+        <tbody class="divide-y divide-border">
           {#each jobs as job (job.id)}
-            <tr class="hover:bg-raised/40">
+            <tr class="hover:bg-muted/40">
               <td class="px-4 py-2">
-                <a class="text-ink hover:underline" href="/o/{org.slug}/queue/{job.id}">
+                <a class="text-foreground hover:underline" href="/o/{org.slug}/queue/{job.id}">
                   {job.title}
                 </a>
-                <div class="of-mono text-xs text-faint">{job.id}</div>
+                <div class="of-mono text-xs text-muted-foreground">{job.id}</div>
               </td>
               <td class="px-4 py-2">
                 <StatusPill status={job.status} />
                 {#if isClaimStranded(job)}
-                  <div class="text-xs font-medium text-bad">{m.job_claim_stranded()}</div>
+                  <div class="text-xs font-medium text-destructive">{m.job_claim_stranded()}</div>
                 {/if}
               </td>
-              <td class="px-4 py-2 text-muted">
+              <td class="px-4 py-2 text-muted-foreground">
                 {job.claimedByLabel ?? job.agentType ?? '—'}
               </td>
-              <td class="px-4 py-2 text-muted">{job.ticketRef ?? '—'}</td>
-              <td class="px-4 py-2 whitespace-nowrap text-faint">{relative(job.createdAt)}</td>
+              <td class="px-4 py-2 text-muted-foreground">{job.ticketRef ?? '—'}</td>
+              <td class="px-4 py-2 whitespace-nowrap text-muted-foreground"
+                >{relative(job.createdAt)}</td
+              >
             </tr>
           {/each}
         </tbody>
@@ -287,7 +292,7 @@
       cap is a separate remark that only sometimes applies; welding them into a
       single string would need a variant per plural category *and* per branch.
     -->
-    <p class="text-xs text-faint">
+    <p class="text-xs text-muted-foreground">
       {m.queue_showing({ count: jobs.length })}
       {#if jobs.length === 200}{m.queue_showing_capped({ limit: 200 })}{/if}
     </p>

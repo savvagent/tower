@@ -10,27 +10,22 @@
  * moves it.
  */
 
-export type PlatformPage = 'members' | 'teams' | 'sso' | 'usage' | 'account' | 'orgs';
+import { checkPlatformUrl } from '@savvagent/console-ui';
+
+/**
+ * The org-scoped platform pages the header's "Manage" menu links to. The account
+ * page and switching org are the shared shell's account menu and org switcher.
+ */
+export type PlatformPage = 'members' | 'teams' | 'sso' | 'usage';
 
 /** The platform console page for `page`, for the org `slug` where it is org-scoped. */
 export function platformLink(platformUrl: string, page: PlatformPage, slug: string): string {
   const base = platformUrl.replace(/\/+$/, '');
-  const org = `${base}/o/${encodeURIComponent(slug)}`;
-  switch (page) {
-    case 'members':
-    case 'teams':
-    case 'sso':
-    case 'usage':
-      return `${org}/${page}`;
-    case 'account':
-      return `${base}/settings`;
-    case 'orgs':
-      return base;
-  }
+  return `${base}/o/${encodeURIComponent(slug)}/${page}`;
 }
 
 /**
- * The platform console's home, for the header's "Back to Savvagent" link — or
+ * The platform console's home, for links back to the platform — or
  * `undefined` when `url` is not an absolute `http(s)` URL.
  *
  * Both places the address comes from are this server's own answers, so the
@@ -81,6 +76,27 @@ export async function discoverPlatformUrl(
     const servers = (body as { authorization_servers?: unknown }).authorization_servers;
     if (!Array.isArray(servers) || typeof servers[0] !== 'string') return undefined;
     return platformHome(servers[0]);
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * The platform address the shared header and footer may be given, or
+ * `undefined`.
+ *
+ * `ConsoleHeader` and `ConsoleFooter` throw on an address their own
+ * `checkPlatformUrl` refuses (https, or http only on loopback; no credentials),
+ * which would take the whole page down with them. Every address handed to the
+ * shell goes through here first, and `undefined` means the layout renders its
+ * plain fallback header and footer instead, never a guessed address.
+ */
+export function shellPlatformUrl(url: string | undefined): string | undefined {
+  const home = platformHome(url);
+  if (!home) return undefined;
+  try {
+    checkPlatformUrl(home);
+    return home;
   } catch {
     return undefined;
   }

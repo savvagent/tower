@@ -2,15 +2,22 @@
   import { api } from '#lib/api.ts';
   import { messageFor } from '#lib/errors.ts';
   import { m } from '#lib/paraglide/messages.js';
-  import { currentLocale } from '#lib/locale.ts';
+  import { currentLocale } from '@savvagent/console-ui';
   import { useOrg } from '#lib/org.svelte.ts';
   import { relative } from '#lib/format.ts';
   import { roleLabel, statusLabel } from '#lib/labels.ts';
   import { Poller } from '#lib/poll.svelte.ts';
   import { fatalApiFailure } from '#lib/poll-fatal.ts';
   import type { Job, QueueStats, Repo } from '#lib/types.ts';
-  import Alert from '#lib/components/Alert.svelte';
-  import Card from '#lib/components/Card.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
+  import {
+    Card,
+    CardAction,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+  } from '@savvagent/console-ui/ui/card';
   import Empty from '#lib/components/Empty.svelte';
   import Loading from '#lib/components/Loading.svelte';
   import StatusPill from '#lib/components/StatusPill.svelte';
@@ -98,18 +105,18 @@
           // the pill beside it another would look like two different things.
           // `Blocked` is not a status — it is a pending job with an unmet
           // dependency — and is the one label of its own.
-          { label: statusLabel('pending'), value: stats.pending, tone: 'text-muted' },
-          { label: statusLabel('in-progress'), value: stats.inProgress, tone: 'text-busy' },
-          { label: statusLabel('active'), value: stats.active, tone: 'text-accent' },
+          { label: statusLabel('pending'), value: stats.pending, tone: 'text-muted-foreground' },
+          { label: statusLabel('in-progress'), value: stats.inProgress, tone: 'text-warning' },
+          { label: statusLabel('active'), value: stats.active, tone: 'text-primary' },
           {
             label: m.overview_tile_blocked(),
             value: stats.blocked,
-            tone: stats.blocked > 0 ? 'text-warn' : 'text-faint'
+            tone: stats.blocked > 0 ? 'text-warning' : 'text-muted-foreground'
           },
           {
             label: statusLabel('failed'),
             value: stats.failed,
-            tone: stats.failed > 0 ? 'text-bad' : 'text-faint'
+            tone: stats.failed > 0 ? 'text-destructive' : 'text-muted-foreground'
           }
         ]
       : []
@@ -120,7 +127,7 @@
   <div class="flex flex-wrap items-start justify-between gap-2">
     <div>
       <h1 class="text-lg font-semibold">{org.title}</h1>
-      <p class="mt-0.5 text-sm text-faint">
+      <p class="mt-0.5 text-sm text-muted-foreground">
         <code class="of-mono">{org.slug}</code> · {m.overview_role_and_plan({
           role: org.role ? roleLabel(org.role) : '—',
           plan: org.org?.plan ?? '—'
@@ -140,14 +147,16 @@
       exists only visually is a warning a blind reader has to guess at.
     -->
     {#if overview.parked}
-      <p role="status" class="max-w-xs text-right text-xs text-faint">{m.overview_paused()}</p>
+      <p role="status" class="max-w-xs text-right text-xs text-muted-foreground">
+        {m.overview_paused()}
+      </p>
     {:else if overview.stale}
-      <p role="status" class="max-w-xs text-right text-xs text-warn">{staleNote}</p>
+      <p role="status" class="max-w-xs text-right text-xs text-warning">{staleNote}</p>
     {/if}
   </div>
 
   {#if error}
-    <Alert>
+    <Alert variant="destructive">
       {error}
       {#if !overview.stopped}
         {m.overview_retrying()}
@@ -158,79 +167,100 @@
   {:else}
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {#each tiles as tile (tile.label)}
-        <div class="of-card px-4 py-3">
+        <div class="of-surface px-4 py-3">
           <div class="text-2xl font-semibold {tile.tone}">
             {tile.value.toLocaleString(currentLocale())}
           </div>
-          <div class="mt-0.5 text-xs text-faint">{tile.label}</div>
+          <div class="mt-0.5 text-xs text-muted-foreground">{tile.label}</div>
         </div>
       {/each}
     </div>
 
     {#if stats && stats.blocked > 0}
-      <Alert tone="warn">
+      <Alert variant="warning">
         {m.overview_blocked_note({ count: stats.blocked })}
         {m.overview_blocked_also_pending({ status: statusLabel('pending') })}
       </Alert>
     {/if}
 
     <div class="grid gap-6 lg:grid-cols-2">
-      <Card title={m.overview_recent_title()} description={m.overview_recent_description()}>
-        {#snippet actions()}
-          <a class="text-xs text-muted underline hover:text-ink" href="/o/{org.slug}/queue">
-            {m.overview_open_queue()}
-          </a>
-        {/snippet}
-
-        {#if recent.length === 0}
-          <Empty title={m.overview_empty_title()}>
-            {m.overview_empty_hint()}
-            <a class="text-muted underline hover:text-ink" href="/o/{org.slug}/connect">
-              {m.overview_connect_one()}
-            </a>.
-          </Empty>
-        {:else}
-          <ul class="divide-y divide-edge/40">
-            {#each recent as job (job.id)}
-              <li class="flex items-center gap-3 py-2">
-                <span class="min-w-24 shrink-0"><StatusPill status={job.status} /></span>
-                <a
-                  class="min-w-0 flex-1 truncate text-sm text-ink hover:underline"
-                  href="/o/{org.slug}/queue/{job.id}"
-                >
-                  {job.title}
-                </a>
-                <span class="shrink-0 text-xs text-faint">{relative(job.createdAt)}</span>
-              </li>
-            {/each}
-          </ul>
-        {/if}
-      </Card>
-
-      <div class="space-y-6">
-        <Card title={m.overview_repos_title()} description={m.overview_repos_description()}>
-          {#snippet actions()}
-            <a class="text-xs text-muted underline hover:text-ink" href="/o/{org.slug}/repos">
-              {m.overview_repos_manage()}
+      <Card>
+        <CardHeader class="border-b">
+          <CardTitle><h2>{m.overview_recent_title()}</h2></CardTitle>
+          <CardDescription>{m.overview_recent_description()}</CardDescription>
+          <CardAction>
+            <a
+              class="text-xs text-muted-foreground underline hover:text-foreground"
+              href="/o/{org.slug}/queue"
+            >
+              {m.overview_open_queue()}
             </a>
-          {/snippet}
-
-          {#if repos.length === 0}
-            <Empty title={m.overview_repos_empty_title()}>
-              {m.overview_repos_empty_hint()}
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          {#if recent.length === 0}
+            <Empty title={m.overview_empty_title()}>
+              {m.overview_empty_hint()}
+              <a
+                class="text-muted-foreground underline hover:text-foreground"
+                href="/o/{org.slug}/connect"
+              >
+                {m.overview_connect_one()}
+              </a>.
             </Empty>
           {:else}
-            <ul class="flex flex-wrap gap-2">
-              {#each repos as repo (repo.id)}
-                <a
-                  class="of-mono rounded-md border border-edge px-2 py-1 text-xs text-muted transition hover:bg-raised hover:text-ink"
-                  href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
-                >
-                  {repo.slug}
-                </a>
+            <ul class="divide-y divide-border">
+              {#each recent as job (job.id)}
+                <li class="flex items-center gap-3 py-2">
+                  <span class="min-w-24 shrink-0"><StatusPill status={job.status} /></span>
+                  <a
+                    class="min-w-0 flex-1 truncate text-sm text-foreground hover:underline"
+                    href="/o/{org.slug}/queue/{job.id}"
+                  >
+                    {job.title}
+                  </a>
+                  <span class="shrink-0 text-xs text-muted-foreground"
+                    >{relative(job.createdAt)}</span
+                  >
+                </li>
               {/each}
             </ul>
           {/if}
+        </CardContent>
+      </Card>
+
+      <div class="space-y-6">
+        <Card>
+          <CardHeader class="border-b">
+            <CardTitle><h2>{m.overview_repos_title()}</h2></CardTitle>
+            <CardDescription>{m.overview_repos_description()}</CardDescription>
+            <CardAction>
+              <a
+                class="text-xs text-muted-foreground underline hover:text-foreground"
+                href="/o/{org.slug}/repos"
+              >
+                {m.overview_repos_manage()}
+              </a>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            {#if repos.length === 0}
+              <Empty title={m.overview_repos_empty_title()}>
+                {m.overview_repos_empty_hint()}
+              </Empty>
+            {:else}
+              <ul class="flex flex-wrap gap-2">
+                {#each repos as repo (repo.id)}
+                  <a
+                    class="of-mono rounded-md border border-border px-2 py-1 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    href="/o/{org.slug}/queue?repo={encodeURIComponent(repo.slug)}"
+                  >
+                    {repo.slug}
+                  </a>
+                {/each}
+              </ul>
+            {/if}
+          </CardContent>
         </Card>
       </div>
     </div>

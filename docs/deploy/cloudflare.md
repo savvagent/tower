@@ -39,6 +39,8 @@ Cloudflare in any meaningful sense, which is what the issue asked for.
 
 ```bash
 cd web
+export NODE_AUTH_TOKEN=…               # read:packages, for @savvagent/console-ui (web/README.md)
+npm ci
 npm run build                          # adapter-static → web/build
 npx wrangler deploy --env production   # or: npm run deploy, which does both
 ```
