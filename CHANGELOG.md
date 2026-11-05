@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/savvagent/tower/compare/v0.20.0...v0.20.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* **web:** move the console to @savvagent/console-ui 0.3.0 ([#301](https://github.com/savvagent/tower/issues/301)) ([1cf42c7](https://github.com/savvagent/tower/commit/1cf42c70b9731b6bdd245356bbf96d711ad734b2))
+
 ## [0.20.0](https://github.com/savvagent/tower/compare/v0.19.0...v0.20.0) (2026-11-05)
 
 
