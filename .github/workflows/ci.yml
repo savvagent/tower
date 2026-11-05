@@ -160,15 +160,16 @@ jobs:
         with:
           persist-credentials: false
 
+      # No `cache: npm`: the npm cache would hold the private package's tarball, and Actions caches
+      # written on master can be restored from any branch, fork pull requests included.
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: web/package-lock.json
 
-      # The token reaches only the download, and no package code runs while it is present:
-      # install scripts run afterwards, in `npm rebuild`, without it. Check, lint and test never
-      # see it.
+      # The token is in the environment of the download only, and no package code runs while it
+      # is: install scripts run afterwards, in `npm rebuild`, without it. (The job as a whole still
+      # holds the token, which a step could recover from the runner's memory; keeping it out of
+      # every other step's environment is what this does, not more.)
       - run: npm ci --ignore-scripts
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -224,11 +225,28 @@ jobs:
           context: .
           push: false
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # `mode=min` exports only the final image's layers. `mode=max` would export the console
+          # stage's `npm ci` layer too, with the private package in it, into a cache any branch can
+          # restore; the final image holds only the built bundle, which is public anyway.
+          cache-to: type=gha,mode=min
           # A BuildKit secret, mounted only for the Dockerfile's `npm ci`: never a build-arg,
           # so it is in no layer and not in the build cache exported above.
           secrets: |
             NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+  # The other half of the fork gate on `web` and `docker-build`: a skipped job reads as passing,
+  # so without this a fork's pull request would show those checks green without running them.
+  # This fails on purpose and says what to do. (The gate itself only stops a fork that leaves this
+  # file alone; the package's access grant is what a fork editing its copy of the workflow meets.)
+  fork-pr-needs-branch:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - run: |
+          echo "::error::web and docker-build need the private @savvagent/console-ui package and do not run on pull requests from forks. A maintainer should push this change to a branch of savvagent/tower and open a pull request from it."
+          exit 1
 
   # Enforces Conventional Commits on PR titles, which become the master commit on squash-merge --
   # release-please's version-bump computation reads a commit's type (feat/fix/...), so a title

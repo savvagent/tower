@@ -118,7 +118,9 @@ or client-specific behaviour changes.
   @savvagent:registry=https://npm.pkg.github.com
   //npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
   ```
-  The file holds a reference, never a token. Locally `export NODE_AUTH_TOKEN=$(gh auth token)`.
+  The file holds a reference, never a token. Locally `gh auth refresh -h github.com -s read:packages`
+  once, then `export NODE_AUTH_TOKEN=$(gh auth token)`; a build sent to Fly gets a classic token with
+  only `read:packages`.
 - CI `web` job: `permissions: { contents: read, packages: read }`, and
   `NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}` on `npm ci --ignore-scripts` only; install scripts
   run afterwards in `npm rebuild`, without it. Checkout runs with `persist-credentials: false`, so
@@ -126,7 +128,10 @@ or client-specific behaviour changes.
   private, and a fork's pull request is still issued a read-only token with `packages: read`, so
   `web` and `docker-build` skip pull requests from forks
   (`github.event.pull_request.head.repo.full_name == github.repository`). Actions handed the token
-  are pinned by commit SHA.
+  are pinned by commit SHA. The fork gate only stops a fork that leaves the workflow alone (a fork's
+  pull request runs its own copy of it), so `fork-pr-needs-branch` fails such a PR visibly instead
+  of letting skipped checks read as passing. No Actions cache holds the package: the `web` job has no
+  npm cache, and `docker-build` exports `mode=min` (the final image's layers only).
 - CI `docker-build` job: `permissions: { contents: read, packages: read }`; `docker/build-push-action`
   gets `secrets: NODE_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}`.
 - `Dockerfile` console stage: `.npmrc` is copied with the manifests, and
@@ -297,5 +302,11 @@ GitHub Packages by Actions are covered by the existing grant and the org's plan.
 - **The deploy token leaves GitHub.** `--build-secret` hands the job token (contents and packages,
   read-only, valid for the job) to Fly's remote builder, and it sits in flyctl's argv on the runner.
   Accepted; building on the runner and deploying the image would avoid it.
+- **A fork can still reach the package.** The package grants this public repository Actions read
+  access, so a fork's pull request that edits its copy of the workflow can request `packages: read`
+  and read the package with its job token, whatever this workflow's gates say. The package's code
+  ships in the public console bundle, so what is exposed is the unminified source. Closing it needs a
+  repository setting (approval for every outside contributor's workflow run) or a package
+  credential fork runs never receive; both are the owner's decision.
 - **Release-gated deploy.** Merging this PR deploys nothing; the change reaches production when the
   next release-please PR merges.
