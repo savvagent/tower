@@ -124,7 +124,7 @@ shell, then the pages, then docs. Each task leaves every gate green.
 - [ ] Add `Spinner.svelte`; restyle `CopyField`, `Empty`, `Loading`, `StatusPill` onto shared tokens.
 - [ ] Replace `Alert`/`Button`/`Card`/`Field` in every page and the org layout with the shared
       components (spec §5) and map every palette class (spec §2 table); delete the four files.
-- [ ] `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted\b|(text|bg|border)-accent\b|of-(card|input|label)' web/src` is empty.
+- [ ] `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted([^-a-z]|$)|(text|bg|border)-accent([^-a-z]|$)|of-(card|input|label)' web/src` is empty.
 - [ ] Render tests pass (update selectors only where markup legitimately changed). Gates + build.
       Commit `refactor(web): use the shared shadcn-svelte components and tokens`.
 

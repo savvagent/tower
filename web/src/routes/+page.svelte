@@ -3,8 +3,8 @@
   import { page } from '$app/state';
   import { m } from '#lib/paraglide/messages.js';
   import { session } from '#lib/session.svelte.ts';
-  import Alert from '#lib/components/Alert.svelte';
-  import Button from '#lib/components/Button.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
+  import { Button } from '@savvagent/console-ui/ui/button';
   import Loading from '#lib/components/Loading.svelte';
 
   /**
@@ -61,39 +61,36 @@
 {:else}
   <div class="space-y-20 pt-6 pb-12">
     {#if loginError}
-      <div class="mx-auto max-w-3xl"><Alert>{loginError}</Alert></div>
+      <div class="mx-auto max-w-3xl"><Alert variant="destructive">{loginError}</Alert></div>
     {/if}
 
     <section class="mx-auto max-w-3xl text-center">
-      <p class="of-label text-accent">{m.landing_eyebrow()}</p>
-      <h1 class="text-ink mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
+      <p class="text-xs font-medium tracking-wide text-primary uppercase">{m.landing_eyebrow()}</p>
+      <h1 class="mt-3 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
         {m.landing_h1()}
       </h1>
-      <p class="mx-auto mt-5 max-w-2xl text-base text-muted sm:text-lg">
+      <p class="mx-auto mt-5 max-w-2xl text-base text-muted-foreground sm:text-lg">
         {m.landing_subhead()}
       </p>
       <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
-        <a href="/auth/login" data-sveltekit-reload>
-          <Button>{m.landing_cta_primary()}</Button>
-        </a>
-        <a
-          href="#how-it-works"
-          class="border-edge hover:bg-raised hover:text-ink rounded-md border px-3 py-2 text-sm font-medium text-muted transition"
+        <Button href="/auth/login" data-sveltekit-reload size="lg">{m.landing_cta_primary()}</Button
         >
-          {m.landing_cta_secondary()}
-        </a>
+        <Button href="#how-it-works" variant="outline" size="lg">{m.landing_cta_secondary()}</Button
+        >
       </div>
     </section>
 
     <section>
-      <h2 class="text-ink text-center text-2xl font-semibold">{m.landing_value_heading()}</h2>
+      <h2 class="text-center text-2xl font-semibold text-foreground">
+        {m.landing_value_heading()}
+      </h2>
       <div class="mt-8 grid gap-4 sm:grid-cols-3">
-        <div class="of-card p-5">
-          <h3 class="text-sm font-semibold text-accent">{m.landing_dev_heading()}</h3>
-          <ul class="mt-3 space-y-3 text-sm text-muted">
+        <div class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+          <h3 class="text-sm font-semibold text-primary">{m.landing_dev_heading()}</h3>
+          <ul class="mt-3 space-y-3 text-sm text-muted-foreground">
             {#each devPoints as point (point)}
               <li class="flex gap-2.5">
-                <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
                 ></span>
                 <span>{point()}</span>
               </li>
@@ -101,12 +98,12 @@
           </ul>
         </div>
 
-        <div class="of-card p-5">
-          <h3 class="text-sm font-semibold text-accent">{m.landing_team_heading()}</h3>
-          <ul class="mt-3 space-y-3 text-sm text-muted">
+        <div class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+          <h3 class="text-sm font-semibold text-primary">{m.landing_team_heading()}</h3>
+          <ul class="mt-3 space-y-3 text-sm text-muted-foreground">
             {#each teamPoints as point (point)}
               <li class="flex gap-2.5">
-                <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
                 ></span>
                 <span>{point()}</span>
               </li>
@@ -114,12 +111,12 @@
           </ul>
         </div>
 
-        <div class="of-card p-5">
-          <h3 class="text-sm font-semibold text-accent">{m.landing_leadership_heading()}</h3>
-          <ul class="mt-3 space-y-3 text-sm text-muted">
+        <div class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
+          <h3 class="text-sm font-semibold text-primary">{m.landing_leadership_heading()}</h3>
+          <ul class="mt-3 space-y-3 text-sm text-muted-foreground">
             {#each leadershipPoints as point (point)}
               <li class="flex gap-2.5">
-                <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-accent"
+                <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-primary"
                 ></span>
                 <span>{point()}</span>
               </li>
@@ -130,50 +127,53 @@
     </section>
 
     <section id="how-it-works" class="scroll-mt-20">
-      <h2 class="text-ink text-center text-2xl font-semibold">{m.landing_how_heading()}</h2>
+      <h2 class="text-center text-2xl font-semibold text-foreground">{m.landing_how_heading()}</h2>
       <ol class="mt-8 grid gap-6 sm:grid-cols-3">
-        <li class="of-card p-5">
+        <li class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
           <div
-            class="bg-raised flex size-8 items-center justify-center rounded-full text-sm font-semibold text-accent"
+            class="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary"
           >
             1
           </div>
-          <h3 class="text-ink mt-3 text-sm font-semibold">{m.landing_how_1_title()}</h3>
-          <p class="mt-1.5 text-sm text-muted">{m.landing_how_1_body()}</p>
+          <h3 class="mt-3 text-sm font-semibold text-foreground">{m.landing_how_1_title()}</h3>
+          <p class="mt-1.5 text-sm text-muted-foreground">{m.landing_how_1_body()}</p>
         </li>
-        <li class="of-card p-5">
+        <li class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
           <div
-            class="bg-raised flex size-8 items-center justify-center rounded-full text-sm font-semibold text-accent"
+            class="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary"
           >
             2
           </div>
-          <h3 class="text-ink mt-3 text-sm font-semibold">{m.landing_how_2_title()}</h3>
-          <p class="mt-1.5 text-sm text-muted">{m.landing_how_2_body()}</p>
+          <h3 class="mt-3 text-sm font-semibold text-foreground">{m.landing_how_2_title()}</h3>
+          <p class="mt-1.5 text-sm text-muted-foreground">{m.landing_how_2_body()}</p>
           <!-- A wire value, not prose — never translated, same as the rest of this console's commands and paths. -->
           <code
-            class="of-mono border-edge bg-canvas mt-3 block overflow-x-auto rounded-md border px-3 py-2 text-xs whitespace-pre"
+            class="of-mono mt-3 block overflow-x-auto rounded-md border bg-muted/40 px-3 py-2 text-xs whitespace-pre"
             >claude mcp add --transport http savvagent-tower https://mcp.your-domain.com/mcp</code
           >
         </li>
-        <li class="of-card p-5">
+        <li class="rounded-xl bg-card p-5 text-card-foreground ring-1 ring-foreground/10">
           <div
-            class="bg-raised flex size-8 items-center justify-center rounded-full text-sm font-semibold text-accent"
+            class="flex size-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary"
           >
             3
           </div>
-          <h3 class="text-ink mt-3 text-sm font-semibold">{m.landing_how_3_title()}</h3>
-          <p class="mt-1.5 text-sm text-muted">{m.landing_how_3_body()}</p>
+          <h3 class="mt-3 text-sm font-semibold text-foreground">{m.landing_how_3_title()}</h3>
+          <p class="mt-1.5 text-sm text-muted-foreground">{m.landing_how_3_body()}</p>
         </li>
       </ol>
     </section>
 
-    <section class="of-card mx-auto max-w-3xl p-6">
-      <h2 class="text-ink text-lg font-semibold">{m.landing_honest_heading()}</h2>
-      <p class="text-faint mt-1 text-sm">{m.landing_honest_intro()}</p>
-      <ul class="mt-4 space-y-2.5 text-sm text-muted">
+    <section
+      class="mx-auto max-w-3xl rounded-xl bg-card p-6 text-card-foreground ring-1 ring-foreground/10"
+    >
+      <h2 class="text-lg font-semibold text-foreground">{m.landing_honest_heading()}</h2>
+      <p class="mt-1 text-sm text-muted-foreground">{m.landing_honest_intro()}</p>
+      <ul class="mt-4 space-y-2.5 text-sm text-muted-foreground">
         {#each honestPoints as point (point)}
           <li class="flex gap-2.5">
-            <span aria-hidden="true" class="bg-faint mt-2 size-1.5 shrink-0 rounded-full"></span>
+            <span aria-hidden="true" class="mt-2 size-1.5 shrink-0 rounded-full bg-muted-foreground"
+            ></span>
             <span>{point()}</span>
           </li>
         {/each}
@@ -181,12 +181,11 @@
     </section>
 
     <section class="mx-auto max-w-xl text-center">
-      <h2 class="text-ink text-2xl font-semibold">{m.landing_final_heading()}</h2>
-      <p class="mt-2 text-sm text-muted">{m.landing_final_body()}</p>
+      <h2 class="text-2xl font-semibold text-foreground">{m.landing_final_heading()}</h2>
+      <p class="mt-2 text-sm text-muted-foreground">{m.landing_final_body()}</p>
       <div class="mt-6">
-        <a href="/auth/login" data-sveltekit-reload>
-          <Button>{m.landing_cta_primary()}</Button>
-        </a>
+        <Button href="/auth/login" data-sveltekit-reload size="lg">{m.landing_cta_primary()}</Button
+        >
       </div>
     </section>
   </div>

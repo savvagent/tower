@@ -15,12 +15,12 @@
   let { status }: Props = $props();
 
   const tones: Record<JobStatus, string> = {
-    pending: 'border-faint/40 bg-faint/10 text-muted',
-    'in-progress': 'border-busy/50 bg-busy/10 text-busy',
-    active: 'border-accent/50 bg-accent/10 text-accent',
-    completed: 'border-ok/50 bg-ok/10 text-ok',
-    failed: 'border-bad/50 bg-bad/10 text-bad',
-    cancelled: 'border-faint/40 bg-faint/10 text-muted'
+    pending: 'border-border bg-muted text-muted-foreground',
+    'in-progress': 'border-warning/50 bg-warning/10 text-warning',
+    active: 'border-primary/50 bg-primary/10 text-primary',
+    completed: 'border-success/50 bg-success/10 text-success',
+    failed: 'border-destructive/50 bg-destructive/10 text-destructive',
+    cancelled: 'border-border bg-muted text-muted-foreground'
   };
 </script>
 

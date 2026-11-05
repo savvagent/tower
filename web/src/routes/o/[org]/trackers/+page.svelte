@@ -12,10 +12,11 @@
     TrackerConnections,
     TrackerProvider
   } from '#lib/types.ts';
-  import Alert from '#lib/components/Alert.svelte';
-  import Button from '#lib/components/Button.svelte';
-  import Card from '#lib/components/Card.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
+  import { Button } from '@savvagent/console-ui/ui/button';
+  import { Card, CardContent, CardHeader, CardTitle } from '@savvagent/console-ui/ui/card';
   import Loading from '#lib/components/Loading.svelte';
+  import Spinner from '#lib/components/Spinner.svelte';
 
   /**
    * Connecting a tracker to this org.
@@ -103,17 +104,17 @@
 <div class="space-y-5">
   <div>
     <h1 class="text-lg font-semibold">{m.trackers_title()}</h1>
-    <p class="text-faint mt-0.5 text-sm">
-      {subtitle[0]}<a class="hover:text-ink underline" href="/o/{org.slug}/repos"
+    <p class="mt-0.5 text-sm text-muted-foreground">
+      {subtitle[0]}<a class="underline hover:text-foreground" href="/o/{org.slug}/repos"
         >{m.trackers_repos_link()}</a
       >{subtitle[1]}
     </p>
   </div>
 
   {#if !org.isAdmin}
-    <Alert>{m.trackers_admin_only()}</Alert>
+    <Alert variant="destructive">{m.trackers_admin_only()}</Alert>
   {:else if error}
-    <Alert>{error}</Alert>
+    <Alert variant="destructive">{error}</Alert>
   {/if}
 
   {#if org.isAdmin}
@@ -123,48 +124,58 @@
       {#each providers as { provider, name, identifies } (provider)}
         {@const setup = data[provider]}
         {@const connection = connectionFor(provider)}
-        <Card title={name}>
-          {#if connection}
-            <div class="flex flex-wrap items-center gap-3">
-              <div class="min-w-0 flex-1">
-                <p class="text-ink text-sm">
-                  {identifies}
-                  <code class="of-mono">{connection.externalId}</code>
-                </p>
-                <p class="text-faint mt-0.5 text-xs">
-                  {connection.hasCredentials
-                    ? m.trackers_connected_with_credentials({
-                        when: relative(connection.createdAt)
-                      })
-                    : m.trackers_connected({ when: relative(connection.createdAt) })}
-                </p>
+        <Card>
+          <CardHeader class="border-b">
+            <CardTitle>{name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {#if connection}
+              <div class="flex flex-wrap items-center gap-3">
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm text-foreground">
+                    {identifies}
+                    <code class="of-mono">{connection.externalId}</code>
+                  </p>
+                  <p class="mt-0.5 text-xs text-muted-foreground">
+                    {connection.hasCredentials
+                      ? m.trackers_connected_with_credentials({
+                          when: relative(connection.createdAt)
+                        })
+                      : m.trackers_connected({ when: relative(connection.createdAt) })}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  disabled={busy === provider}
+                  onclick={() => disconnect(provider)}
+                >
+                  {#if busy === provider}<Spinner />{/if}
+                  {m.trackers_disconnect()}
+                </Button>
               </div>
-              <Button tone="quiet" pending={busy === provider} onclick={() => disconnect(provider)}>
-                {m.trackers_disconnect()}
-              </Button>
-            </div>
-            <p class="text-faint mt-3 text-xs">
-              {m.trackers_disconnect_note({ provider: name })}
-            </p>
-          {:else if setup.configured}
-            <p class="text-sm text-muted">
-              {provider === 'github'
-                ? m.trackers_not_connected_github()
-                : m.trackers_not_connected_jira()}
-            </p>
-            <div class="mt-3">
-              <Button onclick={() => connect(provider, setup)}>
-                {m.trackers_connect_button({ provider: name })}
-              </Button>
-            </div>
-          {:else}
-            <p class="text-sm text-muted">
-              {m.trackers_not_configured({
-                provider: name,
-                credentials: provider === 'github' ? 'GitHub App' : 'Atlassian OAuth'
-              })}
-            </p>
-          {/if}
+              <p class="mt-3 text-xs text-muted-foreground">
+                {m.trackers_disconnect_note({ provider: name })}
+              </p>
+            {:else if setup.configured}
+              <p class="text-sm text-muted-foreground">
+                {provider === 'github'
+                  ? m.trackers_not_connected_github()
+                  : m.trackers_not_connected_jira()}
+              </p>
+              <div class="mt-3">
+                <Button onclick={() => connect(provider, setup)}>
+                  {m.trackers_connect_button({ provider: name })}
+                </Button>
+              </div>
+            {:else}
+              <p class="text-sm text-muted-foreground">
+                {m.trackers_not_configured({
+                  provider: name,
+                  credentials: provider === 'github' ? 'GitHub App' : 'Atlassian OAuth'
+                })}
+              </p>
+            {/if}
+          </CardContent>
         </Card>
       {/each}
     {/if}

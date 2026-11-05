@@ -1,7 +1,7 @@
 <script lang="ts">
   import { copy } from '#lib/format.ts';
   import { m } from '#lib/paraglide/messages.js';
-  import Button from './Button.svelte';
+  import { Button } from '@savvagent/console-ui/ui/button';
 
   /**
    * A value that exists to be copied — a PAT, a provisioning key, an MCP URL.
@@ -31,13 +31,16 @@
 </script>
 
 <div>
-  {#if label}<span class="of-label">{label}</span>{/if}
+  {#if label}<span
+      class="mb-1 block text-xs font-medium tracking-wide text-muted-foreground uppercase"
+      >{label}</span
+    >{/if}
   <div class="flex items-start gap-2">
     <code
-      class="of-mono border-edge bg-canvas text-ink flex-1 rounded-md border px-3 py-2"
+      class="of-mono flex-1 rounded-lg border border-input bg-muted/40 px-3 py-2 text-foreground"
       class:whitespace-pre-wrap={multiline}>{value}</code
     >
-    <Button tone="quiet" onclick={onCopy}>
+    <Button variant="outline" onclick={onCopy}>
       {state === 'copied'
         ? m.copy_copied()
         : state === 'failed'
@@ -46,6 +49,6 @@
     </Button>
   </div>
   {#if state === 'failed'}
-    <p class="text-warn mt-1 text-xs">{m.copy_clipboard_refused()}</p>
+    <p class="mt-1 text-xs text-warning">{m.copy_clipboard_refused()}</p>
   {/if}
 </div>

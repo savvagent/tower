@@ -6,7 +6,7 @@
   import { messageFor } from '#lib/errors.ts';
   import { m } from '#lib/paraglide/messages.js';
   import { completeConnect } from '#lib/trackerState.ts';
-  import Alert from '#lib/components/Alert.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
   import Loading from '#lib/components/Loading.svelte';
 
   /**
@@ -75,9 +75,9 @@
 <div class="mx-auto max-w-md py-10">
   {#if error}
     <h1 class="text-lg font-semibold">{m.trackercb_failed_heading()}</h1>
-    <div class="mt-3"><Alert>{error}</Alert></div>
-    <p class="text-faint mt-4 text-sm">
-      <a class="hover:text-ink underline" href="/">{m.trackercb_back_link()}</a>
+    <div class="mt-3"><Alert variant="destructive">{error}</Alert></div>
+    <p class="mt-4 text-sm text-muted-foreground">
+      <a class="underline hover:text-foreground" href="/">{m.trackercb_back_link()}</a>
     </p>
   {:else}
     <Loading what={m.trackercb_loading()} />

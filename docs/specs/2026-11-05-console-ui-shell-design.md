@@ -79,7 +79,7 @@ keeps no copy of the shell or its primitives.
 - `web/src/routes/+layout.svelte` renders `ConsoleHeader` and `ConsoleFooter`; no other header or
   footer markup exists in `web/src`.
 - `web/src/app.css` imports `@savvagent/console-ui/theme.css` and declares no palette of its own;
-  `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted\b|(text|bg|border)-accent\b|of-(card|input|label)' web/src`
+  `git grep -nE '(text|bg|border|divide|ring)-(ink|faint|canvas|surface|raised|edge|bad|warn|busy|ok|accent-ink)\b|text-muted([^-a-z]|$)|(text|bg|border)-accent([^-a-z]|$)|of-(card|input|label)' web/src`
   is empty. (`text-muted` and `*-accent` are valid shared classes with another meaning — `muted` and
   `accent` are fills there — so they are searched for explicitly; every use is remapped.)
 - `Alert`, `Button`, `Card`, `Field` and `Logo` no longer exist under `web/src/lib/components/`;

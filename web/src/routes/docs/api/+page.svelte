@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { groupByTag, schemaSummary, type OpenApiDocument, type TagGroup } from '#lib/openapi.ts';
-  import Alert from '#lib/components/Alert.svelte';
+  import { Alert } from '@savvagent/console-ui/ui/alert';
   import Loading from '#lib/components/Loading.svelte';
 
   /**
@@ -64,36 +64,43 @@
 
 <div class="space-y-6">
   <div>
-    <h1 class="text-ink text-lg font-semibold">API reference</h1>
-    <p class="text-faint mt-1 text-sm">
+    <h1 class="text-lg font-semibold text-foreground">API reference</h1>
+    <p class="mt-1 text-sm text-muted-foreground">
       The console's REST API, rendered from the same document served at
-      <code class="bg-raised rounded px-1 py-0.5 text-xs">/api/openapi.json</code>.
+      <code class="rounded bg-muted px-1 py-0.5 text-xs">/api/openapi.json</code>.
     </p>
   </div>
 
   {#if loading}
     <Loading what="Loading the API reference" />
   {:else if error}
-    <Alert>
-      {error}
-      <button class="ml-2 underline" onclick={() => void load()}>Try again</button>
+    <Alert variant="destructive">
+      <span>
+        {error}
+        <button class="ml-2 underline" onclick={() => void load()}>Try again</button>
+      </span>
     </Alert>
   {:else}
     {#each groups as group (group.tag)}
       <section class="space-y-3">
-        <h2 class="text-faint text-sm font-semibold tracking-wide uppercase">{group.tag}</h2>
+        <h2 class="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+          {group.tag}
+        </h2>
         <div class="space-y-4">
           {#each group.endpoints as endpoint (endpoint.operationId)}
-            <article id={endpoint.operationId} class="of-card scroll-mt-4 px-4 py-3">
+            <article
+              id={endpoint.operationId}
+              class="scroll-mt-4 rounded-xl bg-card px-4 py-3 text-card-foreground ring-1 ring-foreground/10"
+            >
               <div class="flex flex-wrap items-center gap-2">
                 <span
-                  class="bg-raised text-ink rounded px-1.5 py-0.5 font-mono text-xs font-semibold uppercase"
+                  class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs font-semibold text-foreground uppercase"
                 >
                   {endpoint.method}
                 </span>
-                <span class="text-ink font-mono text-sm">{endpoint.path}</span>
+                <span class="font-mono text-sm text-foreground">{endpoint.path}</span>
                 <span
-                  class="border-edge ml-auto rounded-full border px-2 py-0.5 text-xs font-medium text-muted"
+                  class="ml-auto rounded-full border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground"
                   title="Auth level required to call this endpoint"
                 >
                   {endpoint.auth}
@@ -101,23 +108,23 @@
               </div>
 
               {#if endpoint.summary}
-                <h3 class="text-ink mt-2 text-sm font-semibold">{endpoint.summary}</h3>
+                <h3 class="mt-2 text-sm font-semibold text-foreground">{endpoint.summary}</h3>
               {/if}
               {#if endpoint.description}
-                <p class="mt-1 text-sm text-muted">{endpoint.description}</p>
+                <p class="mt-1 text-sm text-muted-foreground">{endpoint.description}</p>
               {/if}
 
               {#if endpoint.parameters.length > 0}
                 <div class="mt-3">
-                  <h4 class="text-faint text-xs font-semibold tracking-wide uppercase">
+                  <h4 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     Parameters
                   </h4>
                   <table class="mt-1 w-full text-left text-xs">
                     <tbody>
                       {#each endpoint.parameters as param (param.name)}
-                        <tr class="border-edge/40 border-t">
-                          <td class="text-ink py-1 pr-3 font-mono">{param.name}</td>
-                          <td class="py-1 text-muted">{param.description}</td>
+                        <tr class="border-t border-border">
+                          <td class="py-1 pr-3 font-mono text-foreground">{param.name}</td>
+                          <td class="py-1 text-muted-foreground">{param.description}</td>
                         </tr>
                       {/each}
                     </tbody>
@@ -127,18 +134,18 @@
 
               {#if endpoint.requestSchema && doc}
                 <div class="mt-3">
-                  <h4 class="text-faint text-xs font-semibold tracking-wide uppercase">
+                  <h4 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     Request body — {endpoint.requestSchema}
                   </h4>
                   <table class="mt-1 w-full text-left text-xs">
                     <tbody>
                       {#each schemaSummary(doc, endpoint.requestSchema) as prop (prop.name)}
-                        <tr class="border-edge/40 border-t">
-                          <td class="text-ink py-1 pr-3 font-mono">
+                        <tr class="border-t border-border">
+                          <td class="py-1 pr-3 font-mono text-foreground">
                             {prop.name}{prop.required ? ' *' : ''}
                           </td>
-                          <td class="py-1 pr-3 text-muted">{prop.type}</td>
-                          <td class="py-1 text-muted">{prop.description ?? ''}</td>
+                          <td class="py-1 pr-3 text-muted-foreground">{prop.type}</td>
+                          <td class="py-1 text-muted-foreground">{prop.description ?? ''}</td>
                         </tr>
                       {/each}
                     </tbody>
@@ -148,18 +155,18 @@
 
               {#if endpoint.responseSchema && doc}
                 <div class="mt-3">
-                  <h4 class="text-faint text-xs font-semibold tracking-wide uppercase">
+                  <h4 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     Response body — {endpoint.responseSchema}
                   </h4>
                   <table class="mt-1 w-full text-left text-xs">
                     <tbody>
                       {#each schemaSummary(doc, endpoint.responseSchema) as prop (prop.name)}
-                        <tr class="border-edge/40 border-t">
-                          <td class="text-ink py-1 pr-3 font-mono">
+                        <tr class="border-t border-border">
+                          <td class="py-1 pr-3 font-mono text-foreground">
                             {prop.name}{prop.required ? ' *' : ''}
                           </td>
-                          <td class="py-1 pr-3 text-muted">{prop.type}</td>
-                          <td class="py-1 text-muted">{prop.description ?? ''}</td>
+                          <td class="py-1 pr-3 text-muted-foreground">{prop.type}</td>
+                          <td class="py-1 text-muted-foreground">{prop.description ?? ''}</td>
                         </tr>
                       {/each}
                     </tbody>
